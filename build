@@ -1,0 +1,9 @@
+#!/bin/bash
+
+mkdir build_
+cd build_
+
+cmake -G Ninja -D CMAKE_CXX_COMPILER=clang++ ..
+ninja
+
+cd -

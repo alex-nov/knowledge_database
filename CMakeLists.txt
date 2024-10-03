@@ -15,7 +15,21 @@ project(${APPNAME}
         DESCRIPTION "String example C++ built with CMake and googletest"
         LANGUAGES CXX)
 
-add_executable(${APPNAME}
-    ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/content_unit.cpp
-    )
+file(GLOB ALL_SRC
+        "*.h"
+        "*.cpp"
+        "src/*.cpp"
+        "src/utils/*.cpp"
+   )
+
+add_executable(${APPNAME} ${ALL_SRC})
+
+add_subdirectory(${PROJECT_SOURCE_DIR}/src/contrib/uuid)
+
+target_link_libraries(${APPNAME} stduuid)
+
+include_directories(${PROJECT_SOURCE_DIR}/src/contrib/uuid/include)
+#add_executable(${APPNAME}
+#    ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+#    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
+#   )
