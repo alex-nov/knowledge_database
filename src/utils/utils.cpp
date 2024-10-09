@@ -1,3 +1,6 @@
+#include "utils.hpp"
+
+#include <arpa/inet.h>
 
 #include "utils.hpp"
 
@@ -14,5 +17,19 @@ uuids::uuid generate_uuid_v4()
 
     return gen();
 }
+
+bool is_ipv4(const char *host)
+{
+    struct in_addr addr;
+    return 1 == inet_pton(AF_INET, host, &addr);
+}
+
+bool is_ipv6(const char *host)
+{
+    struct in6_addr addr;
+    return 1 == inet_pton(AF_INET6, host, &addr);
+}
+
+bool isIP(const char *str) { return is_ipv4(str) || is_ipv6(str); }
 
 }

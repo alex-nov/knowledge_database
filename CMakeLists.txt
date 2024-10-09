@@ -25,11 +25,13 @@ file(GLOB ALL_SRC
 add_executable(${APPNAME} ${ALL_SRC})
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/contrib/uuid)
+add_subdirectory(${PROJECT_SOURCE_DIR}/src/contrib/pqxx)
+add_subdirectory(${PROJECT_SOURCE_DIR}/src/contrib/fmt)
 
 target_link_libraries(${APPNAME} stduuid)
+target_link_libraries(${APPNAME} pqxx)
+target_link_libraries(${APPNAME} fmt)
 
 include_directories(${PROJECT_SOURCE_DIR}/src/contrib/uuid/include)
-#add_executable(${APPNAME}
-#    ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
-#    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
-#   )
+include_directories(${PROJECT_SOURCE_DIR}/src/contrib/pqxx/include)
+include_directories(${PROJECT_SOURCE_DIR}/src/contrib/fmt/include)

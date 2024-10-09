@@ -1,3 +1,9 @@
 [submodule "src/contrib/uuid"]
 	path = src/contrib/uuid
 	url = https://github.com/mariusbancila/stduuid.git
+[submodule "src/contrib/pqxx"]
+	path = src/contrib/pqxx
+	url = https://github.com/jtv/libpqxx.git
+[submodule "src/contrib/fmt"]
+	path = src/contrib/fmt
+	url = https://github.com/fmtlib/fmt.git
