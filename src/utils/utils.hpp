@@ -1,9 +1,8 @@
 #pragma once
 
-#include <uuid.h>
-
+#include <string>
 namespace utils {
-    uuids::uuid generate_uuid_v4();
+    std::string generate_uuid_v4();
 
     bool isIP(const char *str);
 }

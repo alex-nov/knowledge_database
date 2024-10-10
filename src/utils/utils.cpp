@@ -1,21 +1,16 @@
 #include "utils.hpp"
 
-#include <arpa/inet.h>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
-#include "utils.hpp"
+#include <arpa/inet.h>
 
 namespace utils {
 
-uuids::uuid generate_uuid_v4()
+std::string generate_uuid_v4()
 {
-    static std::random_device rd;
-    auto seed_data = std::array<int, std::mt19937::state_size> {};
-    std::generate(std::begin(seed_data), std::end(seed_data), std::ref(rd));
-    std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
-    std::mt19937 generator(seq);
-    static uuids::uuid_random_generator gen{generator};
-
-    return gen();
+    return boost::uuids::to_string(boost::uuids::random_generator()());
 }
 
 bool is_ipv4(const char *host)

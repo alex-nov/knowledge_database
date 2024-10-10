@@ -2,21 +2,16 @@
 
 #include <string>
 
-#include <uuid.h>
-
-using uuid = uuids::uuid;
-
 struct ThemeTuple
 {
-    std::wstring name;
-    uuid id;
+    std::string uuid;
+    std::string name;
     // tags
 };
 
 struct ContentTreeUnit
 {
-    uuid theme_uuid;
-    uuid unit_uuid;
-
-    uuid parent_id;
+    std::string theme_uuid;
+    std::string parent_uuid;
+    std::string unit_uuid;
 };
