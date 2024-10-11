@@ -10,7 +10,9 @@ public:
     ContentManager(/* args */);
     virtual ~ContentManager();
 
-    std::string CreateTheme(std::string name);
+    std::string CreateTheme(const std::string & name);
+    std::vector<ThemeTuple> GetAllThemes();
+    bool LoadTheme(const std::string & uuid);
 
     void Run();
 private:
