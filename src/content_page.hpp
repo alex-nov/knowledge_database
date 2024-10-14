@@ -2,7 +2,6 @@
 
 #include "common.hpp"
 #include "content_index.hpp"
-#include "database_manager.hpp"
 
 #include <memory>
 
@@ -17,11 +16,12 @@ public:
     void LoadUnit(const std::string & uuid);
     std::string ToJson();
 
+    void AddIndexElement(std::shared_ptr<ContentIndexUnit> new_index);
+    void SetActiveUnit(const std::string & unit_id);
+
 private:
     std::shared_ptr<ContentUnit> _content;
-    std::weak_ptr<ContentIndex>   _index;
-
-    std::weak_ptr<DatabaseManager> _db;
+    std::weak_ptr<ContentIndex>  _index;
 
     std::string _active_unit_id;
 

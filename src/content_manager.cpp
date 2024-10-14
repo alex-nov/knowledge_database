@@ -1,4 +1,5 @@
 #include "content_manager.hpp"
+#include "database_manager.hpp"
 #include "utils/utils.hpp"
 
 
@@ -14,8 +15,7 @@ std::string ContentManager::CreateTheme(const std::string & name)
 {
     ThemeTuple new_theme{ utils::generate_uuid_v4(), name };
 
-    auto strong_db = _db.lock();
-    if(!strong_db && !strong_db->InsertTheme(new_theme))
+    if(!DatabaseManager::Instance()->InsertTheme(new_theme))
     {
         // TODO log error
         return std::string();
@@ -25,19 +25,12 @@ std::string ContentManager::CreateTheme(const std::string & name)
 
 std::vector<ThemeTuple> ContentManager::GetAllThemes()
 {
-    auto strong_db = _db.lock();
-    if(!strong_db)
-    {
-        // TODO log error
-        return {};
-    }
-    return strong_db->GetAllThemes();
+    return DatabaseManager::Instance()->GetAllThemes();
 }
 
 bool ContentManager::LoadTheme(const std::string & uuid)
 {
-    auto strong_db = _db.lock();
-    auto theme = strong_db->GetTheme(uuid);
+    auto theme = DatabaseManager::Instance()->GetTheme(uuid);
     if (theme.uuid.empty())
     {
         // TODO log error
@@ -48,6 +41,30 @@ bool ContentManager::LoadTheme(const std::string & uuid)
     return true;
 }
 
+int32_t ContentManager::SaveUnit(std::shared_ptr<ContentUnit> new_unit, const std::string & parent_index)
+{
+    if(!DatabaseManager::Instance()->InsertUnit(new_unit))
+    {
+        //TODO log error
+        return -1;
+    }
+
+    auto index = std::make_shared<ContentIndexUnit>();
+    index->theme_uuid = new_unit->theme_uuid;
+    index->parent_uuid = parent_index;
+    index->unit_uuid = new_unit->uuid;
+    index->id = DatabaseManager::Instance()->InsertIndexUnit(index);
+    if(index->id < 0)
+    {
+        //TODO log error
+        return -1;
+    }
+    _content_page->AddIndexElement(index);
+    _content_page->SetActiveUnit(index->unit_uuid);
+    //TODO : update viewable page on new unit
+
+    return index->id;
+}
 
 void ContentManager::Run()
 {

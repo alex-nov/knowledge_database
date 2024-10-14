@@ -28,14 +28,18 @@ namespace sql_types
     const std::string_view timestampz = "TIMESTAMP WITH TIME ZONE";
 }
 
-class DatabaseManager
+class DatabaseManager : public std::enable_shared_from_this<DatabaseManager>
 {
 public:
-    DatabaseManager()
+    static std::shared_ptr<DatabaseManager> Instance()
     {
-        // default
-        _db_options = DatabaseOptions{.dbname = "knowledge", .user="know", .password = "know", .hostaddr = "127.0.0.1", .port = 5432};
-    };
+        static std::shared_ptr<DatabaseManager> _DM;
+        if (!_DM)
+        {
+            _DM = std::shared_ptr<DatabaseManager>();
+        }
+        return _DM;
+    }
 
     virtual ~DatabaseManager()
     {};
@@ -46,13 +50,19 @@ public:
     ThemeTuple GetTheme(const std::string & theme_uuid) const;
     std::vector<ThemeTuple> GetAllThemes() const;
 
-    bool SaveUnit(const  std::shared_ptr<ContentUnit> unit );
+    bool InsertUnit(const  std::shared_ptr<ContentUnit> unit );
     std::shared_ptr<ContentUnit> LoadUnit(const  string & unit_uuid ) const;
 
-    bool InsertIndexUnit(const ContentIndexUnit & index_unit);
+    int32_t InsertIndexUnit(std::shared_ptr<ContentIndexUnit> index_unit);
     std::vector< std::shared_ptr<ContentIndexUnit> > GetIndexForTheme(const std::string & theme_id);
 
 private:
+    DatabaseManager()
+    {
+        // default
+        _db_options = DatabaseOptions{.dbname = "knowledge", .user="know", .password = "know", .hostaddr = "127.0.0.1", .port = 5432};
+    };
+
     DatabaseOptions _db_options;
     std::unique_ptr<pqxx::connection> _conn_ptr;
 };

@@ -172,7 +172,7 @@ std::vector<ThemeTuple> DatabaseManager::GetAllThemes() const
     return res;
 }
 
-bool DatabaseManager::SaveUnit(const  std::shared_ptr<ContentUnit> unit )
+bool DatabaseManager::InsertUnit(const std::shared_ptr<ContentUnit> unit )
 {
     if (!_conn_ptr)
     {
@@ -257,34 +257,46 @@ std::shared_ptr<ContentUnit> DatabaseManager::LoadUnit(const std::string & unit_
     return res;
 }
 
-bool DatabaseManager::InsertIndexUnit(const ContentIndexUnit & index_unit)
+int32_t DatabaseManager::InsertIndexUnit(std::shared_ptr<ContentIndexUnit> index_unit)
 {
+    int32_t res = -1;
     if (!_conn_ptr)
     {
         // log connection error
-        return false;
+        return res;
     }
 
     pqxx::work tx{ *_conn_ptr };
     try
     {
         std::string query_text = fmt::format("INSERT INTO storage.themes ( theme_uuid, parent_id, unit_uuid ) "
-                                             "VALUES ( '{0}', '{1}', '{2}' ) ON CONFLICT DO NOTHING RETURNING id;;",
-                                            index_unit.theme_uuid,  // 0
-                                            index_unit.parent_uuid, // 1
-                                            index_unit.unit_uuid);  // 2
+                                             "VALUES ( '{0}', '{1}', '{2}' ) ON CONFLICT DO NOTHING RETURNING id;",
+                                            index_unit->theme_uuid,  // 0
+                                            index_unit->parent_uuid, // 1
+                                            index_unit->unit_uuid);  // 2
         auto result = tx.exec(query_text);
         tx.commit();
+
+
+        if (result.affected_rows() == 0)
+        {
+            // TODO: log error
+            tx.abort();
+            return res;
+        }
+
+        auto row = result.back();
+        res = row["id"].as<int32_t>();
     }
     catch (const std::exception& e)
     {
         tx.abort();
         //TODO log error
         std::cerr << e.what() << '\n';
-        return false;
+        return -1;
     }
 
-    return true;
+    return res;
 }
 
 std::vector< std::shared_ptr<ContentIndexUnit> > DatabaseManager::GetIndexForTheme(const std::string & theme_id)

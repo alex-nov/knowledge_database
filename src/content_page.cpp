@@ -1,22 +1,33 @@
 #include "content_page.hpp"
 
+#include "database_manager.hpp"
+
 void ContentPage::LoadTheme(const std::string & theme_uuid)
 {
-    auto strong_ptr = _index.lock();
+    auto index = _index.lock();
 
-    _active_unit_id = strong_ptr->LoadFromDB(theme_uuid);
+    _active_unit_id = index->LoadFromDB(theme_uuid);
     LoadUnit(_active_unit_id);
 }
 
 void ContentPage::LoadUnit(const std::string & uuid)
 {
-    auto database = _db.lock();
-    if (!database)
+    _content = DatabaseManager::Instance()->LoadUnit(uuid);
+}
+
+void ContentPage::AddIndexElement(std::shared_ptr<ContentIndexUnit> new_index)
+{
+    auto index = _index.lock();
+    index->AddElement(new_index);
+    index->SetActiveElement(new_index);
+}
+
+void ContentPage::SetActiveUnit(const std::string & unit_id)
+{
+    if(!unit_id.empty() || DatabaseManager::Instance()->LoadUnit(unit_id))
     {
-        // TODO: log error;
-        return;
+        _active_unit_id = unit_id;
     }
-    _content = database->LoadUnit(uuid);
 }
 
 std::string ContentPage::ToJson()
