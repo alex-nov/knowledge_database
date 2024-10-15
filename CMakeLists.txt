@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.8)
 set(APPNAME "knowledge_database")
 
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(TARGET_NAME "knowledge_database")
 set(AP_VERSION 0.1.0)
 
@@ -26,6 +27,7 @@ add_executable(${APPNAME} ${ALL_SRC})
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/contrib/pqxx)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/contrib/fmt)
+add_subdirectory(${PROJECT_SOURCE_DIR}/tests)
 
 target_link_libraries(${APPNAME} pqxx)
 target_link_libraries(${APPNAME} fmt)

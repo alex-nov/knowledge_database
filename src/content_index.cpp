@@ -10,7 +10,7 @@ bool ContentIndex::Init(const std::string & theme_id)
 
 std::string ContentIndex::LoadFromDB(const std::string & theme)
 {
-    _theme_index = DatabaseManager::Instance()->GetIndexForTheme(theme);
+    _theme_index = DatabaseManager::Instance().GetIndexForTheme(theme);
     if (!_theme_index.empty())
     {
         _active_index = _theme_index.front();

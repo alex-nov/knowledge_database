@@ -5,15 +5,15 @@
 
 #include "utils/utils.hpp"
 
-void DatabaseManager::Init(const std::string & db_options_str )
+void DatabaseManager::Init(const DatabaseOptions & db_options )
 {
-    if (!db_options_str.empty())
+    if (db_options.IsValid())
     {
-        //TODO : parse optins
+        _db_options = db_options;
     }
     //else use default
 
-    auto connect_string = fmt::format("dbname = {0} user = {1} password = {2} {3} = {4} port = {5}",
+    auto connect_string = fmt::format("dbname = {0} user = {1} password = '{2}' {3} = {4} port = {5}",
                             _db_options.dbname,                                             // 0
                             _db_options.user,                                               // 1
                             _db_options.password,                                           // 2
@@ -21,12 +21,15 @@ void DatabaseManager::Init(const std::string & db_options_str )
                             _db_options.hostaddr,                                           // 4
                             _db_options.port);                                              // 5
 
-
     _conn_ptr = std::make_unique<pqxx::connection>(connect_string);
     if (!_conn_ptr)
     {
         // log connection error
         return;
+    }
+    else
+    {
+        // log connection success
     }
 
     pqxx::work tx{ *_conn_ptr };
@@ -40,12 +43,12 @@ void DatabaseManager::Init(const std::string & db_options_str )
         auto result = tx.exec("CREATE SCHEMA IF NOT EXISTS storage;");
 
         result = tx.exec("CREATE TABLE IF NOT EXISTS storage.themes ( "
-                        "id text PRIMARY KEY NOT NULL"
+                        "id text PRIMARY KEY NOT NULL, "
                         "name text);");
 
         result = tx.exec("CREATE TABLE IF NOT EXISTS storage.units ( "
                         "id text PRIMARY KEY NOT NULL, "
-                        "title text "
+                        "title text, "
                         "theme_uuid text REFERENCES storage.themes (id) ON DELETE CASCADE NOT NULL, "
                         "unit_text text, "
                         "local_path varchar, "
@@ -66,6 +69,55 @@ void DatabaseManager::Init(const std::string & db_options_str )
         // TODO: log error
         tx.abort();
     }
+}
+
+void DatabaseManager::ClearDB()
+{
+    if (!_conn_ptr)
+    {
+        // log connection error
+        return;
+    }
+
+    pqxx::work tx{ *_conn_ptr };
+    try
+    {
+        auto result = tx.exec( "DELETE FROM storage.index CASCADE;" );
+        result = tx.exec( "DELETE FROM storage.themes CASCADE;" );
+        result = tx.exec( "DELETE FROM storage.units CASCADE;" );
+        tx.commit();
+    }
+    catch (const std::exception& e)
+    {
+        tx.abort();
+        //TODO log error
+        std::cerr << e.what() << '\n';
+        return;
+    }
+}
+
+bool DatabaseManager::Ping()
+{
+    if (!_conn_ptr)
+    {
+        // log connection error
+        return false;
+    }
+
+    pqxx::work tx{ *_conn_ptr };
+    try
+    {
+        auto result = tx.exec( "Select 1;" );
+        tx.commit();
+    }
+    catch (const std::exception& e)
+    {
+        tx.abort();
+        //TODO log error
+        std::cerr << e.what() << '\n';
+        return false;
+    }
+    return true;
 }
 
 bool DatabaseManager::InsertTheme(const ThemeTuple & theme)

@@ -1,14 +1,56 @@
-# knowledge_database
+### knowledge_database - KD
 
 App for save and cataloge diffrent knowledge
 
 It'll be good make app client-server via websockets and REST Api
 
-Arch:
+##Архитектура:
 + logical core - work with DB, create ContentPage and send it
 + console interface - show ContentPage, create new text ContentUnit, edit ContentUnit
 + Qt UI - show ContentPage with text, video/animation
 + web view - same as Qt UI, but in browser
 
-TODO in future
-+ different templates for different domains of knowledge
+##TODO:
++ Базовая версия KD
+    - [x] Базовую логику движка -создание юнитов, сохранение в/загрузка из БД; навигация по юнитам
+    - [ ] Добавить библиотеку для работы с json - все страницы конвертировать в удобный json
+    - [ ] Добавить библиотеку websockets - преобразовать приложение в сервер
+    - [ ] Создать десктоп клиент на QT и консольный для тестирования
+    - [ ] web клиент для просмотра базы в браузере
++ Расширенная версия(мб форк)
+    - [ ] Добавить авторизацию
+    - [ ] Переход на тред-пулы для запросов сети и обращения к БД(высонагруженный сервис)
+    - [ ] Роли - пользователь, модер, админ с соотв. правами и функциями
+
+##Установить Зависимости:
+```
+sudo apt install -y libboost-dev postgresql
+```
+
+##Сторонние зависимости
++ (библиотека fmt)[https://github.com/fmtlib/fmt]
++ (библиотека pqxx)[https://github.com/jtv/libpqxx] 
++ для  unit-тестирования (библиотека googletest)[https://github.com/google/googletest] 
+
+## Сборка и запуск проекта
+1. Настроить базу для работы:
+```
+CREATE DATABASE knowledge;
+CREATE USER know
+ALTER USER know WITH PASSWORD 'know';
+GRANT CREATE ON DATABASE knowledge TO know;
+```
+2. Аналогично сделать базу для тестов:
+```
+CREATE DATABASE kd_test;
+CREATE USER kd_test
+ALTER USER kd_test WITH PASSWORD 'kd_test';
+GRANT CREATE ON DATABASE kd_test TO kd_test;
+```
+3. Запустить скрипт сборки
+```
+./build
+```
+4. ... profit!
+
+

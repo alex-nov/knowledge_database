@@ -3,7 +3,7 @@
 mkdir -p build_
 cd build_
 
-cmake -G Ninja -D CMAKE_CXX_COMPILER=clang++ ..
-ninja
+cmake -G Ninja -D CMAKE_CXX_COMPILER=clang++ -S .. -B . --log-context
+cmake --build .
 
 cd -

@@ -16,7 +16,21 @@ struct DatabaseOptions
     string password;
 
     string hostaddr;
-    int16_t port;
+    int port;
+
+    bool IsValid() const
+    {
+        return !dbname.empty() && !user.empty() && !password.empty() && !hostaddr.empty() && port != 0;
+    }
+    void Print() const
+    {
+        printf ("DatabaseOptons: dbname=%s | user=%s | password='%s' | hostaddr=%s | port=%d\n",
+            dbname.c_str(),
+            user.c_str(),
+            password.c_str(),
+            hostaddr.c_str(),
+            port);
+    }
 };
 
 namespace sql_types
@@ -31,20 +45,18 @@ namespace sql_types
 class DatabaseManager : public std::enable_shared_from_this<DatabaseManager>
 {
 public:
-    static std::shared_ptr<DatabaseManager> Instance()
+    static DatabaseManager& Instance()
     {
-        static std::shared_ptr<DatabaseManager> _DM;
-        if (!_DM)
-        {
-            _DM = std::shared_ptr<DatabaseManager>();
-        }
+        static DatabaseManager _DM;
         return _DM;
     }
 
     virtual ~DatabaseManager()
     {};
 
-    void Init(const string & db_options_str);
+    void Init(const DatabaseOptions & db_options);
+    void ClearDB();
+    bool Ping();
 
     bool InsertTheme(const ThemeTuple & theme);
     ThemeTuple GetTheme(const std::string & theme_uuid) const;
@@ -57,7 +69,7 @@ public:
     std::vector< std::shared_ptr<ContentIndexUnit> > GetIndexForTheme(const std::string & theme_id);
 
 private:
-    DatabaseManager()
+    DatabaseManager() : _db_options()
     {
         // default
         _db_options = DatabaseOptions{.dbname = "knowledge", .user="know", .password = "know", .hostaddr = "127.0.0.1", .port = 5432};
