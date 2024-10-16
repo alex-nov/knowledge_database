@@ -20,12 +20,14 @@ CREATE TABLE IF NOT EXISTS storage.index (;
                         unit_uuid text REFERENCES storage.units (id) ON DELETE CASCADE NOT NULL);
 
 
+insert into storage.themes (id, name) values ('67b722ed-8a6f-44db-8ebb-67466800564a', 'test_themes');
+
 INSERT INTO storage.units ( id, title, theme_uuid, unit_text, local_path, content_url, timestamp )
-VALUES ( 'e13811e8-4ace-4dea-bd7e-59cb12e67eeb', 'test title', '67b722ed-8a6f-44db-8ebb-67466800564a' , 'sdfsd sa asf fad fsda dfgdf', '', '', to_timestamp(1728635778) ) ON CONFLICT DO NOTHING;
+VALUES ( 'e13811e8-4ace-4dea-bd7e-59cb12e67eeb', 'test title', '67b722ed-8a6f-44db-8ebb-67466800564a' , 'sdfsd sa asf fad fsda dfgdf', '', '', to_timestamp('1729078302.141') ) ON CONFLICT DO NOTHING;
 
                              0    1       2           3          4            5          6
 INSERT INTO storage.units ( id, title, theme_uuid, unit_text, local_path, content_url, timestamp )
-VALUES ( 'e13811e8-4ace-4dea-bd7e-59cb12e67eeb', 'test title', '67b722ed-8a6f-44db-8ebb-67466800564a' , 'sdfsd sa asf fad fsda dfgdf', '', '', to_timestamp(1728635778) ) ON CONFLICT DO NOTHING;
+VALUES ( 'e13811e8-4ace-4dea-bd7e-59cb24e67eeb', 'test title2', '67b722ed-8a6f-44db-8ebb-67466800564a' , 'sdfsd sa asf bdfad fsda dfgdf', '', '', to_timestamp('1728635778.') ) ON CONFLICT DO NOTHING;
 
 
 INSERT INTO storage.index ( theme_uuid, parent_id, unit_uuid ) VALUES ('67b722ed-8a6f-44db-8ebb-67466800564a', '', 'e13811e8-4ace-4dea-bd7e-59cb12e67eeb');

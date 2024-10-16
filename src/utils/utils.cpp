@@ -5,6 +5,8 @@
 #include <boost/uuid/uuid_io.hpp>
 
 #include <arpa/inet.h>
+#include <random>
+#include <iomanip>
 
 namespace utils {
 
@@ -25,9 +27,36 @@ bool is_ipv6(const char *host)
     return 1 == inet_pton(AF_INET6, host, &addr);
 }
 
-bool isIP(const char *str)
+bool is_IP(const char *str)
 {
     return is_ipv4(str) || is_ipv6(str);
+}
+
+std::string generate_random_string(int length)
+{
+    static const std::string CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    std::random_device rd;
+    std::mt19937 generator(rd());
+
+    std::string random_string;
+    for (int i = 0; i < length; ++i)
+    {
+        size_t pos = generator() % (sizeof(CHARACTERS) - 1);
+        random_string.push_back( CHARACTERS[pos] );
+    }
+
+    return random_string;
+}
+
+time_t string_to_time_t(const std::string& str)
+{
+    static const std::string& format = "%Y-%b-%d %H:%M:%S+%Z";
+    std::tm t = {0};
+    t.tm_isdst = 0;
+    std::istringstream ss(str);
+    ss >> std::get_time(&t, format.c_str());
+    return mktime(&t);
 }
 
 }

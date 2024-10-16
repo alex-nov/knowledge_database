@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <variant>
 
 #include <pqxx/pqxx>
 
@@ -9,29 +10,39 @@
 
 using std::string;
 
-struct DatabaseOptions
+
+
+namespace database
 {
-    string dbname;
-    string user;
-    string password;
+    static const std::string schema = "storage";
+    static const std::string themes_table_name = "themes";
+    static const std::string units_table_name  = "units";
+    static const std::string index_table_name  = "index";
 
-    string hostaddr;
-    int port;
+    struct DatabaseOptions
+    {
+        string dbname;
+        string user;
+        string password;
 
-    bool IsValid() const
-    {
-        return !dbname.empty() && !user.empty() && !password.empty() && !hostaddr.empty() && port != 0;
-    }
-    void Print() const
-    {
-        printf ("DatabaseOptons: dbname=%s | user=%s | password='%s' | hostaddr=%s | port=%d\n",
-            dbname.c_str(),
-            user.c_str(),
-            password.c_str(),
-            hostaddr.c_str(),
-            port);
-    }
-};
+        string hostaddr;
+        int port;
+
+        bool IsValid() const
+        {
+            return !dbname.empty() && !user.empty() && !password.empty() && !hostaddr.empty() && port != 0;
+        }
+        void Print() const
+        {
+            printf ("DatabaseOptons: dbname=%s | user=%s | password='%s' | hostaddr=%s | port=%d\n",
+                dbname.c_str(),
+                user.c_str(),
+                password.c_str(),
+                hostaddr.c_str(),
+                port);
+        }
+    };
+}
 
 namespace sql_types
 {
@@ -54,27 +65,29 @@ public:
     virtual ~DatabaseManager()
     {};
 
-    void Init(const DatabaseOptions & db_options);
+    void Init(const database::DatabaseOptions & db_options);
     void ClearDB();
     bool Ping();
 
-    bool InsertTheme(const ThemeTuple & theme);
-    ThemeTuple GetTheme(const std::string & theme_uuid) const;
-    std::vector<ThemeTuple> GetAllThemes() const;
-
-    bool InsertUnit(const  std::shared_ptr<ContentUnit> unit );
-    std::shared_ptr<ContentUnit> LoadUnit(const  string & unit_uuid ) const;
-
+    bool    InsertTheme(const ThemeTuple & theme);
+    bool    InsertUnit (const  std::shared_ptr<ContentUnit> unit );
     int32_t InsertIndexUnit(std::shared_ptr<ContentIndexUnit> index_unit);
-    std::vector< std::shared_ptr<ContentIndexUnit> > GetIndexForTheme(const std::string & theme_id);
+
+    ThemeTuple                   GetTheme(const std::string & theme_uuid) const;
+    std::shared_ptr<ContentUnit> GetUnit (const  string & unit_uuid ) const;
+
+    std::vector<ThemeTuple>      GetAllThemes() const;
+    std::vector< std::shared_ptr<ContentIndexUnit> > GetIndexForTheme(const std::string & theme_id) const;
+
+    bool DeleteFromTable(const std::variant<std::string, int> & id, const std::string & table);
 
 private:
     DatabaseManager() : _db_options()
     {
         // default
-        _db_options = DatabaseOptions{.dbname = "knowledge", .user="know", .password = "know", .hostaddr = "127.0.0.1", .port = 5432};
+        _db_options = database::DatabaseOptions{.dbname = "knowledge", .user="know", .password = "know", .hostaddr = "127.0.0.1", .port = 5432};
     };
 
-    DatabaseOptions _db_options;
+    database::DatabaseOptions         _db_options;
     std::unique_ptr<pqxx::connection> _conn_ptr;
 };

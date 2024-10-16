@@ -22,35 +22,38 @@ It'll be good make app client-server via websockets and REST Api
     - [ ] Переход на тред-пулы для запросов сети и обращения к БД(высонагруженный сервис)
     - [ ] Роли - пользователь, модер, админ с соотв. правами и функциями
 
-## Установить Зависимости:
-```
-sudo apt install -y libboost-dev postgresql
-```
-
 ## Сторонние зависимости
 + [библиотека fmt](https://github.com/fmtlib/fmt)
 + [библиотека pqxx](https://github.com/jtv/libpqxx)
 + для  unit-тестирования [библиотека googletest](https://github.com/google/googletest)
 
 ## Сборка и запуск проекта
-1. Настроить базу для работы:
+1. Установить зависимости:
+```
+sudo apt install -y libboost-dev postgresql
+```
+
+2. Настроить базу для работы:
 ```
 CREATE DATABASE knowledge;
 CREATE USER know
 ALTER USER know WITH PASSWORD 'know';
 GRANT CREATE ON DATABASE knowledge TO know;
 ```
-2. Аналогично сделать базу для тестов:
+
+3. Аналогично сделать базу для тестов:
 ```
 CREATE DATABASE kd_test;
 CREATE USER kd_test
 ALTER USER kd_test WITH PASSWORD 'kd_test';
 GRANT CREATE ON DATABASE kd_test TO kd_test;
 ```
-3. Запустить скрипт сборки
+
+4. Запустить скрипт сборки
 ```
 ./build
 ```
-4. ... profit!
+
+5. ... profit!
 
 

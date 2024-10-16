@@ -12,7 +12,7 @@ void ContentPage::LoadTheme(const std::string & theme_uuid)
 
 void ContentPage::LoadUnit(const std::string & uuid)
 {
-    _content = DatabaseManager::Instance().LoadUnit(uuid);
+    _content = DatabaseManager::Instance().GetUnit(uuid);
 }
 
 void ContentPage::AddIndexElement(std::shared_ptr<ContentIndexUnit> new_index)
@@ -24,7 +24,7 @@ void ContentPage::AddIndexElement(std::shared_ptr<ContentIndexUnit> new_index)
 
 void ContentPage::SetActiveUnit(const std::string & unit_id)
 {
-    if(!unit_id.empty() || DatabaseManager::Instance().LoadUnit(unit_id))
+    if(!unit_id.empty() || DatabaseManager::Instance().GetUnit(unit_id))
     {
         _active_unit_id = unit_id;
     }
