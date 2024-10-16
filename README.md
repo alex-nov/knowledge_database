@@ -4,13 +4,13 @@ App for save and cataloge diffrent knowledge
 
 It'll be good make app client-server via websockets and REST Api
 
-##Архитектура:
+## Архитектура:
 + logical core - work with DB, create ContentPage and send it
 + console interface - show ContentPage, create new text ContentUnit, edit ContentUnit
 + Qt UI - show ContentPage with text, video/animation
 + web view - same as Qt UI, but in browser
 
-##TODO:
+## TODO:
 + Базовая версия KD
     - [x] Базовую логику движка -создание юнитов, сохранение в/загрузка из БД; навигация по юнитам
     - [ ] Добавить библиотеку для работы с json - все страницы конвертировать в удобный json
@@ -22,15 +22,15 @@ It'll be good make app client-server via websockets and REST Api
     - [ ] Переход на тред-пулы для запросов сети и обращения к БД(высонагруженный сервис)
     - [ ] Роли - пользователь, модер, админ с соотв. правами и функциями
 
-##Установить Зависимости:
+## Установить Зависимости:
 ```
 sudo apt install -y libboost-dev postgresql
 ```
 
-##Сторонние зависимости
-+ (библиотека fmt)[https://github.com/fmtlib/fmt]
-+ (библиотека pqxx)[https://github.com/jtv/libpqxx] 
-+ для  unit-тестирования (библиотека googletest)[https://github.com/google/googletest] 
+## Сторонние зависимости
++ [библиотека fmt](https://github.com/fmtlib/fmt)
++ [библиотека pqxx](https://github.com/jtv/libpqxx)
++ для  unit-тестирования [библиотека googletest](https://github.com/google/googletest)
 
 ## Сборка и запуск проекта
 1. Настроить базу для работы:
