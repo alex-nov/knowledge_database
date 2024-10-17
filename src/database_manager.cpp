@@ -83,15 +83,15 @@ void DatabaseManager::ClearDB()
     try
     {
         auto result = tx.exec( "DELETE FROM storage.index CASCADE;" );
-        result = tx.exec( "DELETE FROM storage.themes CASCADE;" );
         result = tx.exec( "DELETE FROM storage.units CASCADE;" );
+        result = tx.exec( "DELETE FROM storage.themes CASCADE;" );
         tx.commit();
     }
     catch (const std::exception& e)
     {
+        std::cerr << e.what() << '\n';
         tx.abort();
         //TODO log error
-        std::cerr << e.what() << '\n';
         return;
     }
 }
@@ -112,8 +112,6 @@ bool DatabaseManager::Ping()
     }
     catch (const std::exception& e)
     {
-        tx.abort();
-        //TODO log error
         std::cerr << e.what() << '\n';
         return false;
     }
@@ -139,9 +137,9 @@ bool DatabaseManager::InsertTheme(const ThemeTuple & theme)
     }
     catch (const std::exception& e)
     {
+        std::cerr << e.what() << '\n';
         tx.abort();
         //TODO log error
-        std::cerr << e.what() << '\n';
         return false;
     }
 
@@ -175,10 +173,9 @@ ThemeTuple DatabaseManager::GetTheme(const std::string & theme_uuid) const
     }
     catch (const std::exception& e)
     {
+        std::cerr << e.what() << '\n';
         tx.abort();
         //TODO log error
-        std::cerr << e.what() << '\n';
-        return {};
     }
 
     return res;
@@ -215,10 +212,9 @@ std::vector<ThemeTuple> DatabaseManager::GetAllThemes() const
     }
     catch (const std::exception& e)
     {
+        std::cerr << e.what() << '\n';
         tx.abort();
         //TODO log error
-        std::cerr << e.what() << '\n';
-        return {};
     }
 
     return res;
@@ -250,16 +246,14 @@ bool DatabaseManager::InsertUnit(const std::shared_ptr<ContentUnit> unit )
 
         if (result.affected_rows() == 0)
         {
-            // TODO: log error
-            tx.abort();
             return false;
         }
     }
     catch (const std::exception& e)
     {
+        std::cerr << e.what() << '\n';
         tx.abort();
         //TODO log error
-        std::cerr << e.what() << '\n';
         return false;
     }
 
@@ -296,8 +290,6 @@ std::shared_ptr<ContentUnit> DatabaseManager::GetUnit(const std::string & unit_u
         res->text        = row["unit_text"].as<std::string>();
         res->local_path  = row["local_path"].as<std::string>();
         res->content_url = row["content_url"].as<std::string>();
-        printf("DatabaseManager::GetUnit timesatmp = %s \n", row["timestamp"].as<std::string>().c_str());
-        //res->timestamp   = utils::string_to_time_t(row["timestamp"].as<std::string>());
         res->timestamp   = row["timestamp"].as<time_t>();
     }
     catch (const std::exception& e)
@@ -313,7 +305,7 @@ std::shared_ptr<ContentUnit> DatabaseManager::GetUnit(const std::string & unit_u
 int32_t DatabaseManager::InsertIndexUnit(std::shared_ptr<ContentIndexUnit> index_unit)
 {
     int32_t res = -1;
-    if (!_conn_ptr)
+    if (!_conn_ptr || !index_unit)
     {
         // log connection error
         return res;
@@ -322,7 +314,7 @@ int32_t DatabaseManager::InsertIndexUnit(std::shared_ptr<ContentIndexUnit> index
     pqxx::work tx{ *_conn_ptr };
     try
     {
-        std::string query_text = fmt::format("INSERT INTO storage.themes ( theme_uuid, parent_id, unit_uuid ) "
+        std::string query_text = fmt::format("INSERT INTO storage.index ( theme_uuid, parent_id, unit_uuid ) "
                                              "VALUES ( '{0}', '{1}', '{2}' ) ON CONFLICT DO NOTHING RETURNING id;",
                                             index_unit->theme_uuid,  // 0
                                             index_unit->parent_uuid, // 1
@@ -334,7 +326,6 @@ int32_t DatabaseManager::InsertIndexUnit(std::shared_ptr<ContentIndexUnit> index
         if (result.affected_rows() == 0)
         {
             // TODO: log error
-            tx.abort();
             return res;
         }
 
@@ -343,9 +334,9 @@ int32_t DatabaseManager::InsertIndexUnit(std::shared_ptr<ContentIndexUnit> index
     }
     catch (const std::exception& e)
     {
+        std::cerr << e.what() << '\n';
         tx.abort();
         //TODO log error
-        std::cerr << e.what() << '\n';
         return -1;
     }
 
@@ -354,7 +345,7 @@ int32_t DatabaseManager::InsertIndexUnit(std::shared_ptr<ContentIndexUnit> index
 
 std::vector< std::shared_ptr<ContentIndexUnit> > DatabaseManager::GetIndexForTheme(const std::string & theme_id) const
 {
-    if (!_conn_ptr)
+    if (!_conn_ptr || theme_id.empty())
     {
         // log connection error
         return {};
@@ -370,18 +361,18 @@ std::vector< std::shared_ptr<ContentIndexUnit> > DatabaseManager::GetIndexForThe
 
         for (auto row : result)
         {
-            auto index_unit = std::make_shared<ContentIndexUnit>();
-            index_unit->theme_uuid  = row["theme_uuid"].as<std::string>();
-            index_unit->parent_uuid = row["parent_id"].as<std::string>();
-            index_unit->unit_uuid   = row["unit_uuid"].as<std::string>();
+            auto index_unit = std::make_shared<ContentIndexUnit>(row["id"].as<int32_t>(),
+                                                                row["theme_uuid"].as<std::string>(),
+                                                                row["parent_id"].as<std::string>(),
+                                                                row["unit_uuid"].as<std::string>());
             res.push_back(index_unit);
         }
     }
     catch (const std::exception& e)
     {
+        std::cerr << e.what() << '\n';
         tx.abort();
         //TODO log error
-        std::cerr << e.what() << '\n';
     }
 
     return res;
@@ -392,6 +383,13 @@ bool DatabaseManager::DeleteFromTable(const std::variant<std::string, int> & id,
     bool res = false;
     if (!_conn_ptr)
     {
+        std::cerr << "DatabaseManager::DeleteFromTable: wrong id type for " << database::index_table_name << '\n';
+        // log connection error
+        return res;
+    }
+
+    if (std::holds_alternative<int>(id) && table != database::index_table_name)
+    {
         // log connection error
         return res;
     }
@@ -400,19 +398,19 @@ bool DatabaseManager::DeleteFromTable(const std::variant<std::string, int> & id,
     try
     {
         std::string query_text;
-        if (std::holds_alternative<std::string>(id))
-        {
-            query_text = fmt::format("DELETE FROM {0}.{1} WHERE id='{2}';",
-                                            database::schema, // 0
-                                            table,            // 1
-                                            std::get<string>(id)); //2
-        }
-        else if (std::holds_alternative<int>(id) && table == database::index_table_name)
+        if (std::holds_alternative<int>(id))
         {
             query_text = fmt::format("DELETE FROM {0}.{1} WHERE id={2};",
-                                            database::schema,
-                                            table,
-                                            std::get<int>(id));
+                                            database::schema,   // 1
+                                            table,              // 2
+                                            std::get<int>(id)); // 3
+        }
+        else if (std::holds_alternative<std::string>(id))
+        {
+            query_text = fmt::format("DELETE FROM {0}.{1} WHERE id='{2}';",
+                                            database::schema,       // 0
+                                            table,                  // 1
+                                            std::get<string>(id));  // 2
         }
         else
         {
@@ -425,9 +423,9 @@ bool DatabaseManager::DeleteFromTable(const std::variant<std::string, int> & id,
     }
     catch (const std::exception& e)
     {
+        std::cerr << e.what() << '\n';
         tx.abort();
         //TODO log error
-        std::cerr << e.what() << '\n';
     }
 
     return res;

@@ -83,6 +83,25 @@ struct ContentUnit
 
 struct ContentIndexUnit
 {
+    ContentIndexUnit()
+        : id(0)
+        , theme_uuid("")
+        , parent_uuid("")
+        , unit_uuid("")
+    {};
+    ContentIndexUnit(const std::string & theme_id, const std::string & parent, const std::string & unit)
+        : id(0)
+        , theme_uuid(theme_id)
+        , parent_uuid(parent)
+        , unit_uuid(unit)
+    {};
+    ContentIndexUnit(const int32_t id, const std::string & theme_id, const std::string & parent, const std::string & unit)
+        : id(id)
+        , theme_uuid(theme_id)
+        , parent_uuid(parent)
+        , unit_uuid(unit)
+    {};
+
     int32_t id;
     std::string theme_uuid;
     std::string parent_uuid;

@@ -49,10 +49,7 @@ int32_t ContentManager::SaveUnit(std::shared_ptr<ContentUnit> new_unit, const st
         return -1;
     }
 
-    auto index = std::make_shared<ContentIndexUnit>();
-    index->theme_uuid = new_unit->theme_uuid;
-    index->parent_uuid = parent_index;
-    index->unit_uuid = new_unit->uuid;
+    auto index = std::make_shared<ContentIndexUnit>(new_unit->theme_uuid, parent_index, new_unit->uuid);
     index->id = DatabaseManager::Instance().InsertIndexUnit(index);
     if(index->id < 0)
     {
