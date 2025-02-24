@@ -26,13 +26,13 @@ struct ThemeTuple
 struct ContentUnit
 {
     ContentUnit () {}
-    ContentUnit (std::string title, std::string theme_id)
-        : uuid(utils::generate_uuid_v4())
-        , title(title)
-        , theme_uuid(theme_id)
-        , text("")
-        , local_path("")
-        , content_url("")
+    ContentUnit ( const std::string & title, const std::string & theme_id, const std::string & text = "" )
+        : uuid( utils::generate_uuid_v4() )
+        , title( title )
+        , theme_uuid( theme_id )
+        , text( text )
+        , local_path()
+        , content_url()
         , timestamp(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count())
     {}
 
@@ -50,13 +50,17 @@ struct ContentUnit
             && content_url == other.content_url
             && timestamp == other.timestamp;
     }
+
+    std::string GetUuid() { return this->uuid; }
+    std::string GetThemeUuid() { return this->theme_uuid; }
+
     void Print() const
     {
         std::cout << "uuid = " << uuid << " | title = " << title;
         std::cout << " | theme_uuid = " << theme_uuid << " | local_path = " << local_path;
         std::cout << " | content_url = " << content_url << " | timestamp = " << timestamp << std::endl;
 
-        std::cout.imbue(std::locale("en_US.UTF-8"));
+        //std::cout.imbue(std::locale("en_US.UTF-8"));
         std::cout << "unit text: \n" << text << std::endl;
     }
 
@@ -77,6 +81,14 @@ struct ContentUnit
     time_t      timestamp; // added to database
 
     // TODO:
+    // * locales
+        /*
+        C
+        C.utf8
+        POSIX
+        ru_RU.utf8
+        ru_UA.utf8
+        */
     // * tags
     // * json from/to conversation
 };

@@ -59,4 +59,25 @@ time_t string_to_time_t(const std::string& str)
     return mktime(&t);
 }
 
+std::vector<std::string> split(const std::string & str, const char * delim)
+{
+    std::vector<std::string> ret;
+    size_t last = 0;
+    auto index = str.find( delim, last );
+    while (index != std::string::npos)
+    {
+        if (index != last)
+        {
+            ret.push_back(str.substr(last, index - last));
+        }
+        last = index + strlen( delim );
+        index = str.find( delim, last );
+    }
+    if (!str.size() || str.size() != last)
+    {
+        ret.push_back( str.substr(last) );
+    }
+    return ret;
+}
+
 }

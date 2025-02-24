@@ -30,7 +30,7 @@ It'll be good make app client-server via websockets and REST Api
 ## Сборка и запуск проекта
 1. Установить зависимости:
 ```
-sudo apt install -y libboost-dev postgresql
+sudo apt install -y cmake ninja-build clang pkg-config libboost-dev postgresql libpq-dev
 ```
 
 2. Настроить базу для работы:
@@ -44,7 +44,7 @@ GRANT CREATE ON DATABASE knowledge TO know;
 3. Аналогично сделать базу для тестов:
 ```
 CREATE DATABASE kd_test;
-CREATE USER kd_test
+CREATE USER kd_test;
 ALTER USER kd_test WITH PASSWORD 'kd_test';
 GRANT CREATE ON DATABASE kd_test TO kd_test;
 ```

@@ -1,3 +1,5 @@
+CREATE SCHEMA IF NOT EXISTS storage;
+
 CREATE TABLE IF NOT EXISTS storage.themes (
                         id text PRIMARY KEY NOT NULL,
                         name text
@@ -23,7 +25,7 @@ CREATE TABLE IF NOT EXISTS storage.index (;
 insert into storage.themes (id, name) values ('67b722ed-8a6f-44db-8ebb-67466800564a', 'test_themes');
 
 INSERT INTO storage.units ( id, title, theme_uuid, unit_text, local_path, content_url, timestamp )
-VALUES ( 'e13811e8-4ace-4dea-bd7e-59cb12e67eeb', 'test title', '67b722ed-8a6f-44db-8ebb-67466800564a' , 'sdfsd sa asf fad fsda dfgdf', '', '', 1729078302 ) ON CONFLICT DO NOTHING;
+VALUES ( 'e13811e8-4ace-4dea-bd7e-59cb12e67eeb', 'test title', '67b722ed-8a6f-44db-8ebb-67466800564a' , 'sdfsd sa asf fad fsda dfgdf', '', '', '1999-01-08 04:05:06 -8:00' ) ON CONFLICT DO NOTHING;
 
                              0    1       2           3          4            5          6
 INSERT INTO storage.units ( id, title, theme_uuid, unit_text, local_path, content_url, timestamp )
