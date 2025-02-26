@@ -102,15 +102,21 @@ int main(int argi, char ** argc)
                     std::cin >> unit_text;
                     manager.CreateUnit( command_line.at( 2 ), command_line.at( 3 ), unit_text );
                 }
-                // theme or unit
             }
-            else if( command == "delete" )
+            else if( command == "delete" && command_line.size() >= 3 )
             {
-                // theme or unit
+                if( command_line.at( 1 ) == "theme" )
+                {
+                    manager.DeleteTheme( command_line.at( 2 ) );
+                }
+                else if( command_line.at( 1 ) == "unit" )
+                {
+                    manager.DeleteUnit( command_line.at( 2 ) );
+                }
             }
-            else if( command == "modify" )
+            else if( command == "modify" && command_line.size() >= 4 )
             {
-                // theme or unit
+                manager.ModifyUnit( command_line.at( 2 ), command_line.at( 3 ), command_line.at( 4 ) );
             }
             else if( command == "exit" )
             {

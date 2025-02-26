@@ -86,6 +86,24 @@ int32_t ContentManager::SaveUnit( std::shared_ptr<ContentUnit> new_unit, const s
     return index->id;
 }
 
+bool ContentManager::ModifyUnit( const std::string & uuid, const std::string & field, const std::string & value )
+{
+    return DatabaseManager::Instance().ModifyUnit( uuid, field, value );
+}
+
+void ContentManager::DeleteTheme( const std::string & uuid )
+{
+    this->_current_theme_uuid.clear();
+    this->_content_page.reset();
+    DatabaseManager::Instance().DeleteUnitsByTheme( uuid );
+    DatabaseManager::Instance().DeleteFromTable( uuid, database::themes_table_name );
+}
+
+void ContentManager::DeleteUnit( const std::string & uuid )
+{
+    DatabaseManager::Instance().DeleteFromTable( uuid, database::units_table_name );
+}
+
 void ContentManager::Run()
 {
 }

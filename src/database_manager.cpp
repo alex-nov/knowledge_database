@@ -181,6 +181,43 @@ ThemeTuple DatabaseManager::GetTheme(const std::string & theme_uuid) const
     return res;
 }
 
+ThemeTuple DatabaseManager::GetThemeByUnitId(const std::string & unit_uuid) const
+{
+    ThemeTuple res;
+    if (!_conn_ptr)
+    {
+        // log connection error
+        return res;
+    }
+
+    pqxx::work tx{ *_conn_ptr };
+    try
+    {
+        std::string query_text = fmt::format("SELECT st.* FROM storage.themes AS st "
+                                                "JOIN storage.units AS su ON st.id=su.theme_uuid "
+                                                "WHERE su.id='{}';", unit_uuid);
+        auto result = tx.exec( query_text );
+        tx.commit();
+
+        if (result.affected_rows() == 0)
+        {
+            return res;
+        }
+
+        auto row = result.back();
+        res.uuid = row["id"].as<std::string>();
+        res.name = row["name"].as<std::string>();
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+        tx.abort();
+        //TODO log error
+    }
+
+    return res;
+}
+
 std::vector<ThemeTuple> DatabaseManager::GetAllThemes() const
 {
     if (!_conn_ptr)
@@ -220,9 +257,9 @@ std::vector<ThemeTuple> DatabaseManager::GetAllThemes() const
     return res;
 }
 
-bool DatabaseManager::InsertUnit(const std::shared_ptr<ContentUnit> unit )
+bool DatabaseManager::InsertUnit( const std::shared_ptr<ContentUnit> unit )
 {
-    if (!_conn_ptr)
+    if( !_conn_ptr )
     {
         // log connection error
         return false;
@@ -231,25 +268,25 @@ bool DatabaseManager::InsertUnit(const std::shared_ptr<ContentUnit> unit )
     pqxx::work tx{ *_conn_ptr };
     try
     {
-        auto time_str = std::to_string(unit->timestamp);
-        std::string query_text = fmt::format("INSERT INTO storage.units ( id, title, theme_uuid, unit_text, local_path, content_url, timestamp ) "
-                                             "VALUES ( '{0}', '{1}', '{2}', '{3}', '{4}', '{5}', {6} ) ON CONFLICT DO NOTHING;",
-                                             unit->uuid,       // 0
-                                             unit->title,      // 1
-                                             unit->theme_uuid, // 2
-                                             unit->text,       // 3
-                                             unit->local_path, // 4
-                                             unit->content_url,// 5
-                                             time_str.substr(0, 10));// 6
+        auto time_str = std::to_string( unit->timestamp );
+        std::string query_text = fmt::format( "INSERT INTO storage.units ( id, title, theme_uuid, unit_text, local_path, content_url, timestamp ) "
+                                              "VALUES ( '{0}', '{1}', '{2}', '{3}', '{4}', '{5}', {6} ) ON CONFLICT DO NOTHING;",
+                                              unit->uuid,       // 0
+                                              unit->title,      // 1
+                                              unit->theme_uuid, // 2
+                                              unit->text,       // 3
+                                              unit->local_path, // 4
+                                              unit->content_url,// 5
+                                              time_str.substr(0, 10));// 6
         auto result = tx.exec( query_text );
         tx.commit();
 
-        if (result.affected_rows() == 0)
+        if ( result.affected_rows() == 0 )
         {
             return false;
         }
     }
-    catch (const std::exception& e)
+    catch( const std::exception& e )
     {
         std::cerr << e.what() << '\n';
         tx.abort();
@@ -343,6 +380,12 @@ int32_t DatabaseManager::InsertIndexUnit(std::shared_ptr<ContentIndexUnit> index
     return res;
 }
 
+bool DatabaseManager::ModifyUnit( const std::string & unit_uuid, const std::string & field, const std::string & value )
+{
+    //TODO:
+    return true;
+}
+
 std::vector< std::shared_ptr<ContentIndexUnit> > DatabaseManager::GetIndexForTheme(const std::string & theme_id) const
 {
     if (!_conn_ptr || theme_id.empty())
@@ -378,7 +421,7 @@ std::vector< std::shared_ptr<ContentIndexUnit> > DatabaseManager::GetIndexForThe
     return res;
 }
 
-bool DatabaseManager::DeleteFromTable(const std::variant<std::string, int> & id, const std::string & table)
+bool DatabaseManager::DeleteFromTable( const std::variant<std::string, int> & id, const std::string & table )
 {
     bool res = false;
     if (!_conn_ptr)
@@ -416,6 +459,38 @@ bool DatabaseManager::DeleteFromTable(const std::variant<std::string, int> & id,
         {
             throw std::runtime_error("DatabaseManager::DeleteFromTable : wrong id type");
         }
+
+        auto result = tx.exec( query_text );
+        tx.commit();
+        res = result.affected_rows() != 0;
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+        tx.abort();
+        //TODO log error
+    }
+
+    return res;
+}
+
+bool DatabaseManager::DeleteUnitsByTheme( const std::string & theme_id )
+{
+    bool res = false;
+    if (!_conn_ptr)
+    {
+        std::cerr << "DatabaseManager::DeleteFromTable: wrong id type for " << database::index_table_name << '\n';
+        // log connection error
+        return res;
+    }
+
+    pqxx::work tx{ *_conn_ptr };
+    try
+    {
+        std::string query_text = fmt::format("DELETE FROM {0}.{1} WHERE theme_uuid={2};",
+                                            database::schema,           // 0
+                                            database::units_table_name, // 1
+                                            theme_id);                  // 2
 
         auto result = tx.exec( query_text );
         tx.commit();

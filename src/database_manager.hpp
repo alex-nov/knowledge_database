@@ -73,13 +73,17 @@ public:
     bool    InsertUnit (const  std::shared_ptr<ContentUnit> unit );
     int32_t InsertIndexUnit(std::shared_ptr<ContentIndexUnit> index_unit);
 
-    ThemeTuple                   GetTheme(const std::string & theme_uuid) const;
-    std::shared_ptr<ContentUnit> GetUnit (const  string & unit_uuid ) const;
+    bool ModifyUnit( const std::string & unit_uuid, const std::string & field, const std::string & value );
+
+    ThemeTuple                   GetTheme( const std::string & theme_uuid ) const;
+    ThemeTuple                   GetThemeByUnitId( const std::string & unit_uuid ) const;
+    std::shared_ptr<ContentUnit> GetUnit( const  string & unit_uuid ) const;
 
     std::vector<ThemeTuple>      GetAllThemes() const;
     std::vector< std::shared_ptr<ContentIndexUnit> > GetIndexForTheme(const std::string & theme_id) const;
 
-    bool DeleteFromTable(const std::variant<std::string, int> & id, const std::string & table);
+    bool DeleteFromTable( const std::variant<std::string, int> & id, const std::string & table );
+    bool DeleteUnitsByTheme( const std::string & theme_id );
 
 private:
     DatabaseManager() : _db_options()
