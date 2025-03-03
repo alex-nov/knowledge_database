@@ -1,26 +1,35 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <memory>
+
 #include "src/common.hpp"
 #include "src/utils/utils.hpp"
 
 #include "src/content_manager.hpp"
 #include "src/database_manager.hpp"
 
-#include <iostream>
-#include <string>
-#include <vector>
-#include <memory>
+#include "logger/logger.h"
 
 void PrintUnit( const ContentUnit & unit )
 {
     std::cout /*<< "theme name = " << unit.theme_uuid*/ << " | theme uuid = " << unit.theme_uuid << std::endl;
     std::cout << "unit title = " << unit.title << "  | unit uuid = " << unit.uuid << std::endl;
 
-
-    std::cout.imbue( std::locale("ru_UA.utf8") );
+    //std::cout.imbue( std::locale("ru_UA.utf8") );
     std::cout << "unit text: \n" << unit.text << std::endl;
 }
 
 int main(int argi, char ** argc)
 {
+    alog::logger().start();
+    alog::logger().addSaverStdOut(alog::Level::Info);
+
+    log_info << "Logger start 'Demo 01'\n";
+    alog::logger().flush();
+
+    // TODO: change std::cout messages on alog
+
     auto & manager = ContentManager::Instance();
     std::cout << "Hello, it's my knowledge base!" << std::endl;
     // std::wstring test_unit_text_rus (L"В лидерах рейтинга Индия и России, "
@@ -30,12 +39,12 @@ int main(int argi, char ** argc)
     //         L"а российских почти в 12 раз больше, чем официальный МРОТ в их странах. И, "
     //         L"конечно, при таких раскладах отечественные программисты действительно «в шоколаде».");
 
-    std::string test_unit_text_rus ("В лидерах рейтинга Индия и России, "
-            "причём с огромным отрывом. При этом зарплаты программистов в этих "
-            "странах самые низкие. Но за счёт «смешной» величина минималки они ");
+    // std::string test_unit_text_rus ("В лидерах рейтинга Индия и России, "
+    //         "причём с огромным отрывом. При этом зарплаты программистов в этих "
+    //         "странах самые низкие. Но за счёт «смешной» величина минималки они ");
     // create ----------
 
-    std::string test_unit_text("Overload 7 is typically called with its second argument, f, obtained directly from "
+    std::string test_unit_text("Overload 7 is typically called with its second argument, f, obtained directly from \n"
                                "a new-expression: the locale is responsible for calling the matching delete from its own destructor. ");
 
     ThemeTuple theme{ utils::generate_uuid_v4(), "test_theme" };
@@ -44,11 +53,12 @@ int main(int argi, char ** argc)
         std::cout << "ThemeTuple uuid is not valid!" << std::endl;
         return 1;
     }
+
     ContentUnit unit( "test_unit", theme.uuid );
     unit.text = test_unit_text;
-
     // print ----------
     // TODO: fmt::print()
+
     PrintUnit( unit );
     std::cout << "\n\n";
     unit.Print();
@@ -87,7 +97,7 @@ int main(int argi, char ** argc)
             }
             else if( command == "print" )
             {
-
+                log_info << "Print command\n";
             }
             else if( command == "create" && command_line.size() > 3 )
             {
@@ -132,5 +142,6 @@ int main(int argi, char ** argc)
         std::cout << "Exception on main menu\n" << std::endl;
     }
 
+    alog::logger().stop();
     return 0;
 }

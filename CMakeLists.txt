@@ -27,10 +27,13 @@ add_executable(${APPNAME} ${ALL_SRC})
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/contrib/pqxx)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/contrib/fmt)
+add_subdirectory(${PROJECT_SOURCE_DIR}/src/contrib/logger)
 add_subdirectory(${PROJECT_SOURCE_DIR}/tests)
 
 target_link_libraries(${APPNAME} pqxx)
 target_link_libraries(${APPNAME} fmt)
+target_link_libraries(${APPNAME} logger)
 
 include_directories(${PROJECT_SOURCE_DIR}/src/contrib/pqxx/include)
 include_directories(${PROJECT_SOURCE_DIR}/src/contrib/fmt/include)
+include_directories(${PROJECT_SOURCE_DIR}/src/contrib/logger/include)
