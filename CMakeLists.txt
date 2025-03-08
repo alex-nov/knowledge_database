@@ -17,23 +17,16 @@ project(${APPNAME}
         LANGUAGES CXX)
 
 file(GLOB ALL_SRC
-        "*.h"
-        "*.cpp"
-        "src/*.cpp"
-        "src/utils/*.cpp"
-   )
+        "main.cpp"
+)
 
 add_executable(${APPNAME} ${ALL_SRC})
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/contrib/pqxx)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/contrib/fmt)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/contrib/logger)
+add_subdirectory(${PROJECT_SOURCE_DIR}/src/knowledge_manager)
 add_subdirectory(${PROJECT_SOURCE_DIR}/tests)
 
-target_link_libraries(${APPNAME} pqxx)
-target_link_libraries(${APPNAME} fmt)
 target_link_libraries(${APPNAME} logger)
-
-include_directories(${PROJECT_SOURCE_DIR}/src/contrib/pqxx/include)
-include_directories(${PROJECT_SOURCE_DIR}/src/contrib/fmt/include)
-include_directories(${PROJECT_SOURCE_DIR}/src/contrib/logger/include)
+target_link_libraries(${APPNAME} knowledge_manager)

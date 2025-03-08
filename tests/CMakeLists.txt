@@ -27,4 +27,6 @@ target_link_libraries(
 include(GoogleTest)
 gtest_discover_tests(${APPNAME})
 
-include_directories(${PROJECT_SOURCE_DIR}/src/)
+#include_directories(${PROJECT_SOURCE_DIR}/src/)
+
+target_link_libraries(${APPNAME} knowledge_manager)

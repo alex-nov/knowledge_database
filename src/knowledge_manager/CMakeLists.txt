@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 
-set(LIBRARY_NAME "logger")
+set(LIBRARY_NAME "knowledge_manager")
 project(${LIBRARY_NAME})
 
 set(CMAKE_CXX_STANDARD 20)
@@ -13,13 +13,19 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wall -Werror -Wempty-body -Wno-error=dep
 
 file(GLOB_RECURSE ALL_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c
 )
 
 add_library(${LIBRARY_NAME} STATIC ${ALL_SRC})
+
+set(public_headers ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set_target_properties(${LIBRARY_NAME} PROPERTIES PUBLIC_HEADER "${public_headers}")
 
 set(LOGGER_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_include_directories(${LIBRARY_NAME} SYSTEM INTERFACE ${LOGGER_INCLUDE_DIR})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${SOURCE_DIR_HEADER})
+
+target_link_libraries(${LIBRARY_NAME} pqxx)
+target_link_libraries(${LIBRARY_NAME} fmt)
+target_link_libraries(${LIBRARY_NAME} logger)

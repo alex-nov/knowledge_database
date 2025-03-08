@@ -3,13 +3,13 @@
 #include <vector>
 #include <memory>
 
-#include "src/common.hpp"
-#include "src/utils/utils.hpp"
+#include "common.hpp"
+#include "utils/utils.hpp"
 
-#include "src/content_manager.hpp"
-#include "src/database_manager.hpp"
+#include "content_manager.hpp"
+#include "database_manager.hpp"
 
-#include "logger/logger.h"
+#include <logger/logger.h>
 
 void PrintUnit( const ContentUnit & unit )
 {
@@ -25,42 +25,24 @@ int main(int argi, char ** argc)
     alog::logger().start();
     alog::logger().addSaverStdOut(alog::Level::Info);
 
-    log_info << "Logger start 'Demo 01'\n";
-    alog::logger().flush();
-
-    // TODO: change std::cout messages on alog
-
     auto & manager = ContentManager::Instance();
-    std::cout << "Hello, it's my knowledge base!" << std::endl;
-    // std::wstring test_unit_text_rus (L"В лидерах рейтинга Индия и России, "
-    //         L"причём с огромным отрывом. При этом зарплаты программистов в этих "
-    //         L"странах самые низкие. Но за счёт «смешной» величина минималки они "
-    //         L"вырываются вперёд. В среднем индийский программист зарабатывает в 14 раз, "
-    //         L"а российских почти в 12 раз больше, чем официальный МРОТ в их странах. И, "
-    //         L"конечно, при таких раскладах отечественные программисты действительно «в шоколаде».");
+    log_info << "Hello, it's my knowledge base!";
 
-    // std::string test_unit_text_rus ("В лидерах рейтинга Индия и России, "
-    //         "причём с огромным отрывом. При этом зарплаты программистов в этих "
-    //         "странах самые низкие. Но за счёт «смешной» величина минималки они ");
-    // create ----------
-
+    std::string test_unit_text_rus ("В лидерах рейтинга Индия и России, "
+             "причём с огромным отрывом. При этом зарплаты программистов в этих "
+             "странах самые низкие. Но за счёт «смешной» величина минималки они ");
     std::string test_unit_text("Overload 7 is typically called with its second argument, f, obtained directly from \n"
                                "a new-expression: the locale is responsible for calling the matching delete from its own destructor. ");
 
     ThemeTuple theme{ utils::generate_uuid_v4(), "test_theme" };
     if( theme.uuid.empty() )
     {
-        std::cout << "ThemeTuple uuid is not valid!" << std::endl;
+        log_error << "ThemeTuple uuid is not valid!";
         return 1;
     }
 
     ContentUnit unit( "test_unit", theme.uuid );
     unit.text = test_unit_text;
-    // print ----------
-    // TODO: fmt::print()
-
-    PrintUnit( unit );
-    std::cout << "\n\n";
     unit.Print();
 
     std::string command_text;
@@ -84,7 +66,6 @@ int main(int argi, char ** argc)
 
             if( command == "help" )
             {
-                //print help
                 std::cout << "Command list: \n"
                           << " 1. help [] - show this manual\n"
                           << " 2. print [] - print full tree from current DB in format \"name\" - \"id\" \n"
@@ -103,6 +84,7 @@ int main(int argi, char ** argc)
             {
                 if( command_line.at( 1 ) == "theme" )
                 {
+                    log_info << "Create theme command";
                     manager.CreateTheme( command_line.at( 2 ) );
                 }
                 else if( command_line.at( 1 ) == "unit" && command_line.size() >= 4 )\
@@ -110,6 +92,7 @@ int main(int argi, char ** argc)
                     std::cout << "Enter unit text: " << std::endl;
                     std::string unit_text;
                     std::cin >> unit_text;
+                    log_info << "Create unit command";
                     manager.CreateUnit( command_line.at( 2 ), command_line.at( 3 ), unit_text );
                 }
             }
@@ -117,29 +100,33 @@ int main(int argi, char ** argc)
             {
                 if( command_line.at( 1 ) == "theme" )
                 {
+                    log_info << "Delete theme command";
                     manager.DeleteTheme( command_line.at( 2 ) );
                 }
                 else if( command_line.at( 1 ) == "unit" )
                 {
+                    log_info << "Delete unit command";
                     manager.DeleteUnit( command_line.at( 2 ) );
                 }
             }
             else if( command == "modify" && command_line.size() >= 4 )
             {
+                log_info << "Modify unit command";
                 manager.ModifyUnit( command_line.at( 2 ), command_line.at( 3 ), command_line.at( 4 ) );
             }
             else if( command == "exit" )
             {
+                log_info << "Exit command";
                 break;
             }
             else
             {
-                std::cout << "Wrong command!" << std::endl;
+                log_error << "Wrong command!";
             }
         } while( true );
     } catch (...)
     {
-        std::cout << "Exception on main menu\n" << std::endl;
+        log_error << "Exception on main menu";
     }
 
     alog::logger().stop();

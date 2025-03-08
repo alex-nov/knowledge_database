@@ -2,9 +2,18 @@
 #include "database_manager.hpp"
 #include "utils/utils.hpp"
 
+#include <logger/logger.h>
+
+#include <unistd.h>
+
+#define log_error_m   alog::logger().error   (alog_line_location, "Module1")
+#define log_info_m    alog::logger().info    (alog_line_location, "Module1")
+#define log_debug_m   alog::logger().debug   (alog_line_location, "Module1")
+
 
 ContentManager & ContentManager::Instance()
 {
+    log_debug_m << "Func1. Message ";
     static ContentManager instance;
     return instance;
 }
@@ -107,3 +116,7 @@ void ContentManager::DeleteUnit( const std::string & uuid )
 void ContentManager::Run()
 {
 }
+
+#undef log_error_m
+#undef log_info_m
+#undef log_debug_m
