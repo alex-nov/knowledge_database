@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.11)
-cmake_policy(SET CMP0074 NEW)
+cmake_minimum_required(VERSION 3.8)
 
 set(APPNAME "knowledge_database")
 
@@ -8,15 +7,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(TARGET_NAME "knowledge_database")
 set(AP_VERSION 0.1.0)
 
-if(WIN32)
-    set(PostgreSQL_ROOT "C:/Program Files/PostgreSQL/17")
-    set(PostgreSQL_INCLUDE_DIR "${PostgreSQL_ROOT}/include")
-    set(PostgreSQL_LIBRARY "${PostgreSQL_ROOT}/lib/libpq.lib")
-endif()
-
-find_package(PostgreSQL REQUIRED)
-include_directories(${PostgreSQL_INCLUDE_DIRS})
-#target_link_libraries(${APPNAME} ${PostgreSQL_LIBRARIES})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -Werror -Wempty-body -Wredundant-move -Wno-error=deprecated-declarations -Wno-writable-strings -Wimplicit-fallthrough")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wall -Werror -Wempty-body -Wno-error=deprecated-declarations -Wno-writable-strings -Wimplicit-fallthrough")
