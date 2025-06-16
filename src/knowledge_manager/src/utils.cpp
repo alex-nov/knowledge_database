@@ -12,70 +12,70 @@ namespace utils {
 
 std::string generate_uuid_v4()
 {
-    return boost::uuids::to_string(boost::uuids::random_generator()());
+    return boost::uuids::to_string( boost::uuids::random_generator()() );
 }
 
-bool is_ipv4(const char *host)
+bool is_ipv4( const char *host )
 {
     struct in_addr addr;
-    return 1 == inet_pton(AF_INET, host, &addr);
+    return 1 == inet_pton( AF_INET, host, &addr );
 }
 
-bool is_ipv6(const char *host)
+bool is_ipv6( const char *host )
 {
     struct in6_addr addr;
-    return 1 == inet_pton(AF_INET6, host, &addr);
+    return 1 == inet_pton( AF_INET6, host, &addr );
 }
 
-bool is_IP(const char *str)
+bool is_IP( const char *str )
 {
     return is_ipv4(str) || is_ipv6(str);
 }
 
-std::string generate_random_string(int length)
+std::string generate_random_string( int length )
 {
     static const std::string CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     std::random_device rd;
-    std::mt19937 generator(rd());
+    std::mt19937 generator( rd() );
 
     std::string random_string;
-    for (int i = 0; i < length; ++i)
+    for( int i = 0; i < length; ++i )
     {
-        size_t pos = generator() % (sizeof(CHARACTERS) - 1);
-        random_string.push_back( CHARACTERS[pos] );
+        size_t pos = generator() % ( sizeof( CHARACTERS ) - 1 );
+        random_string.push_back( CHARACTERS[ pos ] );
     }
 
     return random_string;
 }
 
-time_t string_to_time_t(const std::string& str)
+time_t string_to_time_t( const std::string& str )
 {
     static const std::string& format = "%Y-%b-%d %H:%M:%S+%Z";
     std::tm t = {0};
     t.tm_isdst = 0;
-    std::istringstream ss(str);
-    ss >> std::get_time(&t, format.c_str());
-    return mktime(&t);
+    std::istringstream ss( str );
+    ss >> std::get_time( &t, format.c_str() );
+    return mktime( &t );
 }
 
-std::vector<std::string> split(const std::string & str, const char * delim)
+std::vector< std::string > split(const std::string & str, const char * delim)
 {
-    std::vector<std::string> ret;
+    std::vector< std::string > ret;
     size_t last = 0;
     auto index = str.find( delim, last );
-    while (index != std::string::npos)
+    while( index != std::string::npos )
     {
-        if (index != last)
+        if( index != last )
         {
-            ret.push_back(str.substr(last, index - last));
+            ret.push_back( str.substr( last, index - last ));
         }
         last = index + strlen( delim );
         index = str.find( delim, last );
     }
-    if (!str.size() || str.size() != last)
+    if ( !str.size() || str.size() != last )
     {
-        ret.push_back( str.substr(last) );
+        ret.push_back( str.substr( last ));
     }
     return ret;
 }

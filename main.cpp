@@ -11,13 +11,15 @@
 
 #include <logger/logger.h>
 
+using std::endl;
+
 void PrintUnit( const ContentUnit & unit )
 {
-    std::cout /*<< "theme name = " << unit.theme_uuid*/ << " | theme uuid = " << unit.theme_uuid << std::endl;
-    std::cout << "unit title = " << unit.title << "  | unit uuid = " << unit.uuid << std::endl;
+    std::cout << "theme uuid = " << unit.theme_uuid << " | theme uuid = " << unit.theme_uuid << endl;
+    std::cout << "unit title = " << unit.title << "  | unit uuid = " << unit.uuid << endl;
 
     //std::cout.imbue( std::locale("ru_UA.utf8") );
-    std::cout << "unit text: \n" << unit.text << std::endl;
+    std::cout << "unit text: \n" << unit.text << endl;
 }
 
 int main(int argi, char ** argc)
@@ -25,8 +27,8 @@ int main(int argi, char ** argc)
     alog::logger().start();
     alog::logger().addSaverStdOut(alog::Level::Info);
 
+    DatabaseManager::Instance();
     auto & manager = ContentManager::Instance();
-    log_info << "Hello, it's my knowledge base!";
 
     std::string test_unit_text_rus ("В лидерах рейтинга Индия и России, "
              "причём с огромным отрывом. При этом зарплаты программистов в этих "
@@ -52,13 +54,13 @@ int main(int argi, char ** argc)
     try {
         do
         {
-            std::cout << "Print command : " << std::endl;
-            std::cin >> command_text;
+            std::cout << "Enter a command : " << endl;
+            std::getline(std::cin, command_text);
             command_line = utils::split( command_text, " " );
 
             if( command_line.size() < 0 )
             {
-                std::cout << "Wrong command!" << std::endl;
+                log_error << "Empty command!";
                 continue;
             }
 
@@ -69,50 +71,64 @@ int main(int argi, char ** argc)
                 std::cout << "Command list: \n"
                           << " 1. help [] - show this manual\n"
                           << " 2. print [] - print full tree from current DB in format \"name\" - \"id\" \n"
+                          << "    print themes - print all themes"
                           << "    print [unit id] - print full data from unit\n"
                           << " 3. create a) theme [theme name] - create head index for knowledge tree\n"
                           << "           b) unit [unit title] [parent_unit id] - create unit. If parent_unit_id = theme_id - add unit on top level\n"
                           << "              of theme. Text parameter is optional\n"
                           << " 4. modify [unit id] [field name] [field value] - modify unit parameters.\n"
-                          << " 5. delete theme/unit [id] - delete unit or full tree by theme" << std::endl;
+                          << " 5. delete theme/unit [id] - delete unit or full tree by theme\n"
+                          << " 6. exit - exit from knowledged database" << endl;
             }
             else if( command == "print" )
             {
-                log_info << "Print command\n";
+                if( command_line.size() >= 2 && command_line.at( 1 ) == "themes" )
+                {
+                    auto themes = manager.GetAllThemes();
+                    for( auto & theme : themes )
+                    {
+                        std::cout << "name : \"" << theme.name << "\" \t uuid = \"" << theme.uuid <<"\"\n";
+                    }
+                }
             }
-            else if( command == "create" && command_line.size() > 3 )
+            else if( command == "create" && command_line.size() >= 3 )
             {
                 if( command_line.at( 1 ) == "theme" )
                 {
-                    log_info << "Create theme command";
-                    manager.CreateTheme( command_line.at( 2 ) );
+                    auto new_theme_id = manager.CreateTheme( command_line.at( 2 ) );
+                    log_info << "Created theme uuid = " + new_theme_id;
                 }
                 else if( command_line.at( 1 ) == "unit" && command_line.size() >= 4 )\
                 {
-                    std::cout << "Enter unit text: " << std::endl;
+                    std::cout << "Enter unit text: " << endl;
                     std::string unit_text;
-                    std::cin >> unit_text;
-                    log_info << "Create unit command";
-                    manager.CreateUnit( command_line.at( 2 ), command_line.at( 3 ), unit_text );
+                    std::getline(std::cin, unit_text);
+                    auto new_unit_id = manager.CreateUnit( command_line.at( 2 ), command_line.at( 3 ), unit_text );
+                    log_info << "Created unit uuid = " << new_unit_id;
+                }
+                else
+                {
+                    log_error << "Wrong command create \"" << command_text << "\"";
                 }
             }
             else if( command == "delete" && command_line.size() >= 3 )
             {
+                bool result = false;
                 if( command_line.at( 1 ) == "theme" )
                 {
-                    log_info << "Delete theme command";
-                    manager.DeleteTheme( command_line.at( 2 ) );
+                    result = manager.DeleteTheme( command_line.at( 2 ) );
+                    log_info << "Delete theme " << command_line.at( 2 ) << ( result ? " successed" : " failed" );
                 }
                 else if( command_line.at( 1 ) == "unit" )
                 {
-                    log_info << "Delete unit command";
-                    manager.DeleteUnit( command_line.at( 2 ) );
+                    result = manager.DeleteUnit( command_line.at( 2 ) );
+                    log_info << "Delete unit " << command_line.at( 2 ) << ( result ? " successed" : " failed" );
                 }
             }
             else if( command == "modify" && command_line.size() >= 4 )
             {
-                log_info << "Modify unit command";
-                manager.ModifyUnit( command_line.at( 2 ), command_line.at( 3 ), command_line.at( 4 ) );
+                auto result = manager.ModifyUnit( command_line.at( 2 ), command_line.at( 3 ), command_line.at( 4 ) );
+                log_info << "Modify unit " << command_line.at( 2 ) << ( result ? " successed" : " failed" );
             }
             else if( command == "exit" )
             {
@@ -121,8 +137,11 @@ int main(int argi, char ** argc)
             }
             else
             {
-                log_error << "Wrong command!";
+                log_error << "Wrong command: \"" << command << "\"";
             }
+
+            command.clear();
+            command_line.clear();
         } while( true );
     } catch (...)
     {

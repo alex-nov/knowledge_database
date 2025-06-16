@@ -12,7 +12,7 @@ It'll be good make app client-server via websockets and REST Api
 
 ## TODO:
 + Базовая версия KD
-    - [x] Базовую логику движка -создание юнитов, сохранение в/загрузка из БД; навигация по юнитам
+    - [x] Базовую логику движка - создание юнитов, сохранение в/загрузка из БД; навигация по юнитам
     - [ ] Добавить библиотеку для работы с json - все страницы конвертировать в удобный json
     - [ ] Добавить библиотеку websockets - преобразовать приложение в сервер
     - [ ] Создать десктоп клиент на QT и консольный для тестирования
@@ -25,6 +25,7 @@ It'll be good make app client-server via websockets and REST Api
 ## Сторонние зависимости
 + [библиотека fmt](https://github.com/fmtlib/fmt)
 + [библиотека pqxx](https://github.com/jtv/libpqxx)
++ [logger Alog](https://github.com/hkarel/SharedTools/tree/master/logger)
 + для  unit-тестирования [библиотека googletest](https://github.com/google/googletest)
 
 ## Сборка и запуск проекта
@@ -51,9 +52,7 @@ GRANT CREATE ON DATABASE kd_test TO kd_test;
 
 4. Запустить скрипт сборки
 ```
-./build
+./build_kd
 ```
 
 5. ... profit!
-
-
