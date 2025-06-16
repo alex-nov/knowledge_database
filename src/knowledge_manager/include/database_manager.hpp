@@ -32,14 +32,23 @@ namespace database
         {
             return !dbname.empty() && !user.empty() && !password.empty() && !hostaddr.empty() && port != 0;
         }
-        void Print() const
+
+        std::string Tostring() const
         {
-            printf ("DatabaseOptons: dbname=%s | user=%s | password='%s' | hostaddr=%s | port=%d\n",
+            std::string res;
+            res.reserve(100);
+            sprintf ( res.data(),  "DatabaseOptons: dbname=%s | user=%s | password='%s' | hostaddr=%s | port=%d\n",
                 dbname.c_str(),
                 user.c_str(),
                 password.c_str(),
                 hostaddr.c_str(),
-                port);
+                port );
+            return res;
+        }
+
+        void Print() const
+        {
+            std::cout << this->Tostring();
         }
     };
 }
@@ -70,14 +79,14 @@ public:
     bool Ping();
 
     bool    InsertTheme(const ThemeTuple & theme);
-    bool    InsertUnit (const  std::shared_ptr<ContentUnit> unit );
-    int32_t InsertIndexUnit(std::shared_ptr<ContentIndexUnit> index_unit);
+    bool    InsertUnitWithIndex ( const  std::shared_ptr< ContentUnit > unit,
+                                  const std::shared_ptr< ContentIndexUnit > index_unit );
 
     bool ModifyUnit( const std::string & unit_uuid, const std::string & field, const std::string & value );
 
-    ThemeTuple                   GetTheme( const std::string & theme_uuid ) const;
-    ThemeTuple                   GetThemeByUnitId( const std::string & unit_uuid ) const;
-    std::shared_ptr<ContentUnit> GetUnit( const  string & unit_uuid ) const;
+    ThemeTuple                     GetTheme( const std::string & theme_uuid ) const;
+    ThemeTuple                     GetThemeByUnitId( const std::string & unit_uuid ) const;
+    std::shared_ptr< ContentUnit > GetUnit( const  string & unit_uuid ) const;
 
     std::vector<ThemeTuple>      GetAllThemes() const;
     std::vector< std::shared_ptr<ContentIndexUnit> > GetIndexForTheme(const std::string & theme_id) const;
@@ -90,7 +99,10 @@ private:
     {
         // default
         _db_options = database::DatabaseOptions{.dbname = "knowledge", .user="know", .password = "know", .hostaddr = "127.0.0.1", .port = 5432};
+        Init( _db_options );
     };
+    DatabaseManager( DatabaseManager const& );
+    DatabaseManager& operator= ( DatabaseManager const& );
 
     database::DatabaseOptions         _db_options;
     std::unique_ptr<pqxx::connection> _conn_ptr;

@@ -2,38 +2,32 @@
 
 #include "database_manager.hpp"
 
-void ContentPage::LoadTheme(const std::string & theme_uuid)
-{
-    auto index = _index.lock();
 #include <logger/logger.h>
 
-    _active_unit_id = index->LoadFromDB(theme_uuid);
-    LoadUnit(_active_unit_id);
-}
 #define log_error_m   alog::logger().error   (alog_line_location, "ContentPage")
 #define log_info_m    alog::logger().info    (alog_line_location, "ContentPage")
 #define log_debug_m   alog::logger().debug   (alog_line_location, "ContentPage")
 
-void ContentPage::LoadUnit(const std::string & uuid)
-{
-    _content = DatabaseManager::Instance().GetUnit(uuid);
-}
 
-void ContentPage::AddIndexElement(std::shared_ptr<ContentIndexUnit> new_index)
+void ContentPage::LoadUnit( const std::string & uuid )
 {
-    auto index = _index.lock();
-    index->AddElement(new_index);
-    index->SetActiveElement(new_index);
     log_info_m << "ContentPage::LoadUnit uuid = " + uuid;
+    _active_unit_id = uuid;
+    _content = DatabaseManager::Instance().GetUnit( _active_unit_id );
+    // make json
 }
 
-void ContentPage::SetActiveUnit(const std::string & unit_id)
+void ContentPage::LoadUnit( std::shared_ptr< ContentUnit > unit )
 {
-    if(!unit_id.empty() || DatabaseManager::Instance().GetUnit(unit_id))
+    if( !unit )
     {
-        _active_unit_id = unit_id;
+        return;
     }
+
     log_info_m << "ContentPage::LoadUnit2 uuid = " + unit->GetUuid();
+    _active_unit_id = unit->GetUuid();
+    _content = unit;
+    // make json
 }
 
 std::string ContentPage::ToJson()
