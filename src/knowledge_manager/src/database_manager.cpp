@@ -82,7 +82,7 @@ void DatabaseManager::ClearDB()
     log_info_m << "DatabaseManager::ClearDB";
     if( !_conn_ptr )
     {
-        log_error_m << "DatabaseManager::ClearDB connection error";
+        log_error_m << "DatabaseManager::ClearDB DB connection error";
         return;
     }
 
@@ -107,7 +107,7 @@ bool DatabaseManager::Ping()
     log_info_m << "DatabaseManager::Ping";
     if( !_conn_ptr )
     {
-        log_error_m << "DatabaseManager::Ping connection error";
+        log_error_m << "DatabaseManager::Ping DB connection error";
         return false;
     }
 
@@ -131,7 +131,7 @@ bool DatabaseManager::InsertTheme( const ThemeTuple & theme )
     log_info_m << "DatabaseManager::InsertTheme \"" << theme.uuid << "\"";
     if( !_conn_ptr )
     {
-        log_error_m << "DatabaseManager::InsertTheme connection error";
+        log_error_m << "DatabaseManager::InsertTheme DB connection error";
         return false;
     }
 
@@ -160,7 +160,7 @@ ThemeTuple DatabaseManager::GetTheme( const std::string & theme_uuid ) const
     ThemeTuple res;
     if( !_conn_ptr )
     {
-        log_error_m << "DatabaseManager::GetTheme connection error";
+        log_error_m << "DatabaseManager::GetTheme DB connection error";
         return res;
     }
 
@@ -172,7 +172,7 @@ ThemeTuple DatabaseManager::GetTheme( const std::string & theme_uuid ) const
 
         if( result.affected_rows() == 0 )
         {
-            throw "there is no theme";
+            throw std::runtime_error( "there is no theme" );
         }
         tx.commit();
 
@@ -195,7 +195,7 @@ ThemeTuple DatabaseManager::GetThemeByUnitId(const std::string & unit_uuid) cons
 
     if( !_conn_ptr )
     {
-        log_error_m << "DatabaseManager::GetThemeByUnitId connection error";
+        log_error_m << "DatabaseManager::GetThemeByUnitId DB connection error";
         return {};
     }
 
@@ -210,7 +210,7 @@ ThemeTuple DatabaseManager::GetThemeByUnitId(const std::string & unit_uuid) cons
 
         if( result.affected_rows() == 0 )
         {
-            throw "there is no theme";
+            throw std::runtime_error( "there is no theme" );
         }
 
         tx.commit();
@@ -233,7 +233,7 @@ std::vector< ThemeTuple > DatabaseManager::GetAllThemes() const
     log_info_m << "DatabaseManager::GetAllThemes";
     if( !_conn_ptr )
     {
-        log_error_m << "DatabaseManager::GetAllThemes connection error";
+        log_error_m << "DatabaseManager::GetAllThemes DB connection error";
         return {};
     }
 
@@ -246,7 +246,7 @@ std::vector< ThemeTuple > DatabaseManager::GetAllThemes() const
 
         if( result.affected_rows() == 0 )
         {
-            throw "there is no themes";
+            throw std::runtime_error( "there is no themes" );
         }
         tx.commit();
 
@@ -267,13 +267,14 @@ std::vector< ThemeTuple > DatabaseManager::GetAllThemes() const
     return res;
 }
 
+// TODO: rework создавать индекс уже внутри метода
 bool DatabaseManager::InsertUnitWithIndex( const std::shared_ptr< ContentUnit > unit,
                                            const std::shared_ptr< ContentIndexUnit > index_unit )
 {
     log_info_m << "DatabaseManager::InsertUnit unit_uuid = \"" << unit->GetUuid() << "\"";
     if( !_conn_ptr )
     {
-        log_error_m << "DatabaseManager::InsertUnit connection error";
+        log_error_m << "DatabaseManager::InsertUnit DB connection error";
         return false;
     }
 
@@ -294,7 +295,7 @@ bool DatabaseManager::InsertUnitWithIndex( const std::shared_ptr< ContentUnit > 
         auto result = tx.exec( query_text );
         if ( result.affected_rows() == 0 )
         {
-            throw "can't save unit";
+            throw std::runtime_error( "can't save unit" );
         }
 
         // insert unit index
@@ -321,25 +322,26 @@ bool DatabaseManager::InsertUnitWithIndex( const std::shared_ptr< ContentUnit > 
     return true;
 }
 
-std::shared_ptr<ContentUnit> DatabaseManager::GetUnit( const std::string & unit_uuid ) const
+std::shared_ptr< ContentUnit > DatabaseManager::GetUnit( const std::string & unit_uuid ) const
 {
     log_info_m << "DatabaseManager::GetUnit unit_uuid = \"" << unit_uuid << "\"";
-    std::shared_ptr< ContentUnit > res;
-    if ( !_conn_ptr )
+
+    if( !_conn_ptr )
     {
-        log_error_m << "DatabaseManager::GetUnit connection error";
-        return res;
+        log_error_m << "DatabaseManager::GetUnit DB connection error";
+        return {};
     }
 
+    std::shared_ptr< ContentUnit > res;
     pqxx::work tx{ *_conn_ptr };
     try
     {
-        std::string query_text = fmt::format("SELECT * FROM storage.units WHERE id='{}';", unit_uuid);
+        std::string query_text = fmt::format( "SELECT * FROM storage.units WHERE id='{}';", unit_uuid );
         auto result = tx.exec( query_text );
 
-        if (result.affected_rows() == 0)
+        if( result.affected_rows() == 0 )
         {
-            throw "there is no units with uuid";
+            throw std::runtime_error( "there is no units with uuid" );
         }
         tx.commit();
 
@@ -353,7 +355,7 @@ std::shared_ptr<ContentUnit> DatabaseManager::GetUnit( const std::string & unit_
         res->content_url = row[ "content_url" ].as< std::string >();
         res->timestamp   = row[ "timestamp" ].as< time_t >();
     }
-    catch (const std::exception& e)
+    catch( const std::exception& e )
     {
         log_error_m << "DatabaseManager::GetUnit exception: " << e.what();
         tx.abort();
@@ -368,6 +370,12 @@ bool DatabaseManager::ModifyUnit( const std::string & unit_uuid, const std::stri
                << " field \"" << field << "\""
                << " value \"" << value << "\"";
 
+    if( !_conn_ptr )
+    {
+        log_error_m << "DatabaseManager::ModifyUnit DB connection error";
+        return false;
+    }
+
     pqxx::work tx{ *_conn_ptr };
     try
     {
@@ -380,7 +388,7 @@ bool DatabaseManager::ModifyUnit( const std::string & unit_uuid, const std::stri
         auto result = tx.exec( query_text );
         if( result.affected_rows() == 0 )
         {
-            throw "unit wasn't changed";
+            throw std::runtime_error( "unit wasn't changed" );
         }
         tx.commit();
     }
@@ -388,20 +396,21 @@ bool DatabaseManager::ModifyUnit( const std::string & unit_uuid, const std::stri
     {
         log_error_m << "DatabaseManager::GetIndexForTheme exception: " << e.what();
         tx.abort();
+        return false;
     }
 
     return true;
 }
 
-std::vector< std::shared_ptr<ContentIndexUnit > > DatabaseManager::GetIndexForTheme( const std::string & theme_id ) const
+std::vector< std::shared_ptr< ContentIndexUnit > > DatabaseManager::GetIndexForTheme( const std::string & theme_id ) const
 {
     if ( !_conn_ptr || theme_id.empty() )
     {
-        log_error_m << "DatabaseManager::GetIndexForTheme connection error";
+        log_error_m << "DatabaseManager::GetIndexForTheme DB connection error";
         return {};
     }
 
-    std::vector< std::shared_ptr<ContentIndexUnit> > res;
+    std::vector< std::shared_ptr< ContentIndexUnit > > res;
     pqxx::work tx{ *_conn_ptr };
     try
     {
@@ -409,12 +418,12 @@ std::vector< std::shared_ptr<ContentIndexUnit > > DatabaseManager::GetIndexForTh
         auto result = tx.exec( query_text );
         tx.commit();
 
-        for (auto row : result)
+        for( auto row : result )
         {
-            auto index_unit = std::make_shared<ContentIndexUnit>(row[ "id" ].as< int32_t >(),
-                                                                row[ "theme_uuid" ].as< std::string >(),
-                                                                row[ "parent_id" ].as< std::string >(),
-                                                                row[ "unit_uuid" ].as< std::string >());
+            auto index_unit = std::make_shared<ContentIndexUnit>( row[ "id" ].as< int32_t >(),
+                                                                  row[ "theme_uuid" ].as< std::string >(),
+                                                                  row[ "parent_id" ].as< std::string >(),
+                                                                  row[ "unit_uuid" ].as< std::string >());
             res.push_back( index_unit );
         }
     }
@@ -431,7 +440,7 @@ bool DatabaseManager::DeleteFromTable( const std::variant<std::string, int> & id
 {
     if( !_conn_ptr )
     {
-        log_error_m << "DatabaseManager::DeleteFromTable connection error";
+        log_error_m << "DatabaseManager::DeleteFromTable DB connection error";
         return false;
     }
 
@@ -484,7 +493,7 @@ bool DatabaseManager::DeleteUnitsByTheme( const std::string & theme_id )
 
     if( !_conn_ptr )
     {
-        log_error_m << "DatabaseManager::DeleteUnitsByTheme connection error";
+        log_error_m << "DatabaseManager::DeleteUnitsByTheme DB connection error";
         return false;
     }
 

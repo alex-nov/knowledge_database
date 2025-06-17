@@ -124,11 +124,15 @@ int main(int argi, char ** argc)
                     result = manager.DeleteUnit( command_line.at( 2 ) );
                     log_info << "Delete unit " << command_line.at( 2 ) << ( result ? " successed" : " failed" );
                 }
+                else
+                {
+                    log_error << "Wrong command: \"" << command_text << "\"";
+                }
             }
             else if( command == "modify" && command_line.size() >= 4 )
             {
-                auto result = manager.ModifyUnit( command_line.at( 2 ), command_line.at( 3 ), command_line.at( 4 ) );
-                log_info << "Modify unit " << command_line.at( 2 ) << ( result ? " successed" : " failed" );
+                auto result = manager.ModifyUnit( command_line.at( 1 ), command_line.at( 2 ), command_line.at( 3 ) );
+                log_info << "Modify unit " << command_line.at( 1 ) << ( result ? " successed" : " failed" );
             }
             else if( command == "exit" )
             {
@@ -137,7 +141,7 @@ int main(int argi, char ** argc)
             }
             else
             {
-                log_error << "Wrong command: \"" << command << "\"";
+                log_error << "Wrong command: \"" << command_text << "\"";
             }
 
             command.clear();

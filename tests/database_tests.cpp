@@ -27,13 +27,13 @@ TEST_F(DatabaseManagerFixture, AddGetTheme)
   EXPECT_TRUE ( DatabaseManager::Instance().InsertTheme(test_theme) );
 
   const auto all_themes = DatabaseManager::Instance().GetAllThemes();
-  EXPECT_TRUE ( all_themes.size() == 1 );
+  ASSERT_TRUE ( all_themes.size() == 1 );
   EXPECT_TRUE ( all_themes.back() == test_theme );
 
   EXPECT_FALSE( DatabaseManager::Instance().GetTheme("") == test_theme );
-  EXPECT_FALSE( DatabaseManager::Instance().GetTheme(utils::generate_random_string(10)) == test_theme );
-  EXPECT_FALSE( DatabaseManager::Instance().GetTheme(utils::generate_uuid_v4()) == test_theme );
-  EXPECT_TRUE ( DatabaseManager::Instance().GetTheme(test_theme.uuid) == test_theme );
+  EXPECT_FALSE( DatabaseManager::Instance().GetTheme( utils::generate_random_string( 10 ) ) == test_theme );
+  EXPECT_FALSE( DatabaseManager::Instance().GetTheme( utils::generate_uuid_v4()) == test_theme );
+  EXPECT_TRUE ( DatabaseManager::Instance().GetTheme( test_theme.uuid ) == test_theme );
 }
 
 TEST_F(DatabaseManagerFixture, DeleteTheme)
@@ -42,18 +42,18 @@ TEST_F(DatabaseManagerFixture, DeleteTheme)
 
   EXPECT_TRUE ( DatabaseManager::Instance().InsertTheme(test_theme) );
 
-  EXPECT_FALSE( DatabaseManager::Instance().DeleteFromTable("", database::themes_table_name) );
-  EXPECT_FALSE( DatabaseManager::Instance().DeleteFromTable(utils::generate_uuid_v4(), database::themes_table_name) );
-  EXPECT_FALSE( DatabaseManager::Instance().DeleteFromTable(12, database::themes_table_name) );
+  EXPECT_FALSE( DatabaseManager::Instance().DeleteFromTable( "", database::themes_table_name ) );
+  EXPECT_FALSE( DatabaseManager::Instance().DeleteFromTable( utils::generate_uuid_v4(), database::themes_table_name ) );
+  EXPECT_FALSE( DatabaseManager::Instance().DeleteFromTable( 12, database::themes_table_name ) );
 
-  EXPECT_TRUE ( DatabaseManager::Instance().DeleteFromTable(test_theme.uuid, database::themes_table_name) );
+  EXPECT_TRUE ( DatabaseManager::Instance().DeleteFromTable( test_theme.uuid, database::themes_table_name ) );
 }
 
 TEST_F(DatabaseManagerFixture, GetEmptyUnit)
 {
-  EXPECT_FALSE(DatabaseManager::Instance().GetUnit(""));
-  EXPECT_FALSE(DatabaseManager::Instance().GetUnit(utils::generate_random_string(10)));
-  EXPECT_FALSE(DatabaseManager::Instance().GetUnit(utils::generate_uuid_v4()));
+  EXPECT_FALSE( DatabaseManager::Instance().GetUnit( "" ));
+  EXPECT_FALSE( DatabaseManager::Instance().GetUnit( utils::generate_random_string( 10 ) ));
+  EXPECT_FALSE( DatabaseManager::Instance().GetUnit( utils::generate_uuid_v4() ));
 }
 
 TEST_F(DatabaseManagerFixture, InsertGetUnit)
@@ -63,7 +63,7 @@ TEST_F(DatabaseManagerFixture, InsertGetUnit)
 
   EXPECT_TRUE ( DatabaseManager::Instance().InsertTheme( test_theme ) );
   const auto test_unit = GetRandomUnit( test_theme.uuid );
-  const auto test_index_element = std::make_shared<ContentIndexUnit>( test_theme.uuid, std::string(""), test_unit->uuid );
+  const auto test_index_element = std::make_shared< ContentIndexUnit >( test_theme.uuid, std::string(""), test_unit->uuid );
 
   EXPECT_TRUE ( DatabaseManager::Instance().InsertUnitWithIndex( test_unit, test_index_element ) );
   const auto get_unit = DatabaseManager::Instance().GetUnit( test_unit->uuid );
@@ -74,56 +74,46 @@ TEST_F(DatabaseManagerFixture, InsertGetUnit)
 
 TEST_F(DatabaseManagerFixture, InsertDeleteUnit)
 {
-  EXPECT_TRUE ( DatabaseManager::Instance().InsertTheme(test_theme) );
+  EXPECT_TRUE ( DatabaseManager::Instance().InsertTheme( test_theme ) );
   const auto test_unit = GetRandomUnit( test_theme.uuid );
-  const auto test_index_element = std::make_shared<ContentIndexUnit>( test_theme.uuid, std::string(""), test_unit->uuid) ;
+  const auto test_index_element = std::make_shared< ContentIndexUnit >( test_theme.uuid, std::string(""), test_unit->uuid ) ;
   EXPECT_TRUE ( DatabaseManager::Instance().InsertUnitWithIndex( test_unit, test_index_element ) );
 
   EXPECT_FALSE( DatabaseManager::Instance().DeleteFromTable( "", database::units_table_name ) );
   EXPECT_FALSE( DatabaseManager::Instance().DeleteFromTable( utils::generate_uuid_v4(), database::units_table_name ) );
   EXPECT_FALSE( DatabaseManager::Instance().DeleteFromTable( utils::generate_random_string(10), database::units_table_name ) );
+
+  //with unit always delete it's index
   EXPECT_TRUE ( DatabaseManager::Instance().DeleteFromTable( test_unit->uuid, database::units_table_name ) );
+
+  EXPECT_FALSE ( DatabaseManager::Instance().GetUnit( test_unit->GetUuid() ) );
+  EXPECT_TRUE  ( DatabaseManager::Instance().GetIndexForTheme( test_theme.uuid ).empty() );
 }
 
 TEST_F(DatabaseManagerFixture, GetEmptyIndex)
 {
-  EXPECT_TRUE( DatabaseManager::Instance().GetIndexForTheme("").empty() );
-  EXPECT_TRUE( DatabaseManager::Instance().GetIndexForTheme( utils::generate_uuid_v4()).empty() );
-  EXPECT_TRUE( DatabaseManager::Instance().GetIndexForTheme( utils::generate_random_string(10)).empty() );
+  EXPECT_TRUE( DatabaseManager::Instance().GetIndexForTheme( "" ).empty() );
+  EXPECT_TRUE( DatabaseManager::Instance().GetIndexForTheme( utils::generate_uuid_v4() ).empty() );
+  EXPECT_TRUE( DatabaseManager::Instance().GetIndexForTheme( utils::generate_random_string( 10 ) ).empty() );
 }
 
 TEST_F(DatabaseManagerFixture, InsertGetIndex)
 {
   const auto test_unit = GetRandomUnit( test_theme.uuid );
-  const auto test_index_element = std::make_shared<ContentIndexUnit>( test_theme.uuid, std::string(""), test_unit->uuid );
+  const auto test_index_element = std::make_shared< ContentIndexUnit >( test_theme.uuid, std::string( "" ), test_unit->uuid );
 
-  EXPECT_TRUE ( DatabaseManager::Instance().InsertTheme(test_theme) );
+  EXPECT_TRUE ( DatabaseManager::Instance().InsertTheme( test_theme ) );
   EXPECT_TRUE ( DatabaseManager::Instance().InsertUnitWithIndex( test_unit, test_index_element ) );
 
-  EXPECT_TRUE ( DatabaseManager::Instance().GetIndexForTheme("").empty() );
-  EXPECT_TRUE ( DatabaseManager::Instance().GetIndexForTheme(utils::generate_uuid_v4()).empty() );
-  EXPECT_TRUE ( DatabaseManager::Instance().GetIndexForTheme(utils::generate_random_string(10)).empty() );
+  EXPECT_TRUE ( DatabaseManager::Instance().GetIndexForTheme( "" ).empty() );
+  EXPECT_TRUE ( DatabaseManager::Instance().GetIndexForTheme( utils::generate_uuid_v4() ).empty() );
+  EXPECT_TRUE ( DatabaseManager::Instance().GetIndexForTheme( utils::generate_random_string(10) ).empty() );
 
   auto index = DatabaseManager::Instance().GetIndexForTheme( test_theme.uuid );
   ASSERT_FALSE( index.empty() );
+  EXPECT_TRUE ( index.back()->unit_uuid == test_index_element->unit_uuid );
   EXPECT_TRUE ( index.back()->parent_uuid == test_index_element->parent_uuid );
   EXPECT_TRUE ( index.back()->theme_uuid == test_index_element->theme_uuid );
-  EXPECT_TRUE ( index.back()->unit_uuid == test_index_element->unit_uuid );
-}
-
-TEST_F(DatabaseManagerFixture, DeleteIndexElement)
-{
-  EXPECT_TRUE ( DatabaseManager::Instance().InsertTheme( test_theme ) );
-  const auto test_unit = GetRandomUnit( test_theme.uuid );
-  auto test_index_element = std::make_shared<ContentIndexUnit>( test_theme.uuid, std::string(""), test_unit->uuid );
-  EXPECT_TRUE ( DatabaseManager::Instance().InsertUnitWithIndex( test_unit, test_index_element ) );
-
-  ASSERT_TRUE ( DatabaseManager::Instance().GetIndexForTheme( test_theme.uuid).empty() );
-
-  EXPECT_FALSE( DatabaseManager::Instance().DeleteFromTable( 0, database::index_table_name ) );
-  EXPECT_FALSE( DatabaseManager::Instance().DeleteFromTable( "", database::index_table_name ) );
-  EXPECT_FALSE( DatabaseManager::Instance().DeleteFromTable( utils::generate_random_string( 10 ), database::index_table_name ) );
-  EXPECT_TRUE ( DatabaseManager::Instance().DeleteFromTable( test_index_element->id, database::index_table_name ) );
 }
 
 TEST_F(DatabaseManagerFixture, InsertTwoSameThemeIndexElement)
@@ -142,41 +132,54 @@ TEST_F(DatabaseManagerFixture, InsertTwoSameThemeIndexElement)
   EXPECT_TRUE ( index[ 0 ] != index[ 1 ] );
 }
 
-TEST_F(DatabaseManagerFixture, InsertTwoDifferentThemeIndexElement)
+TEST_F(DatabaseManagerFixture, InsertUnitsForTwoDifferentThemes)
 {
-  const ThemeTuple theme2{ utils::generate_uuid_v4(), "test_theme2" };
-  const auto test_unit = GetRandomUnit( test_theme.uuid );
-  const auto test_unit2 = GetRandomUnit( theme2.uuid );
-  auto test_index_element = std::make_shared<ContentIndexUnit>( test_theme.uuid, std::string(""), test_unit->uuid );
-  auto test_index_element2 = std::make_shared<ContentIndexUnit>( theme2.uuid, std::string(""), test_unit2->uuid );
+  const auto test_unit  = GetRandomUnit( test_theme.uuid );
+  auto test_index_element  = std::make_shared< ContentIndexUnit >( test_theme.uuid, std::string(""), test_unit->uuid );
+
+  const ThemeTuple test_theme2{ utils::generate_uuid_v4(), "test_theme2" };
+  const auto test_unit2 = GetRandomUnit( test_theme2.uuid );
+  auto test_index_element2 = std::make_shared< ContentIndexUnit >( test_theme2.uuid, std::string(""), test_unit2->uuid );
 
   EXPECT_TRUE ( DatabaseManager::Instance().InsertTheme( test_theme ) );
-  EXPECT_TRUE ( DatabaseManager::Instance().InsertTheme( theme2 ) );
+  EXPECT_TRUE ( DatabaseManager::Instance().InsertTheme( test_theme2 ) );
   EXPECT_TRUE ( DatabaseManager::Instance().InsertUnitWithIndex( test_unit, test_index_element ) );
-  EXPECT_TRUE ( DatabaseManager::Instance().InsertUnitWithIndex( test_unit2, test_index_element ) );
+  EXPECT_TRUE ( DatabaseManager::Instance().InsertUnitWithIndex( test_unit2, test_index_element2 ) );
 
   auto index = DatabaseManager::Instance().GetIndexForTheme( test_theme.uuid );
   ASSERT_TRUE ( index.size() == 1 );
-  EXPECT_TRUE ( index.back() == test_index_element);
+  EXPECT_TRUE ( index.back()->unit_uuid == test_index_element->unit_uuid );
+  EXPECT_TRUE ( index.back()->parent_uuid == test_index_element->parent_uuid );
+  EXPECT_TRUE ( index.back()->theme_uuid == test_index_element->theme_uuid );
+
+  index = DatabaseManager::Instance().GetIndexForTheme( test_theme2.uuid );
+  ASSERT_TRUE ( index.size() == 1 );
+  EXPECT_TRUE ( index.back()->unit_uuid == test_index_element2->unit_uuid );
+  EXPECT_TRUE ( index.back()->parent_uuid == test_index_element2->parent_uuid );
+  EXPECT_TRUE ( index.back()->theme_uuid == test_index_element2->theme_uuid );
 }
 
 TEST_F(DatabaseManagerFixture, TreeIndex)
 {
   const auto test_unit_parent = GetRandomUnit( test_theme.uuid );
-  const auto test_unit_child1 = GetRandomUnit( test_theme.uuid );
+  const auto test_unit_child = GetRandomUnit( test_theme.uuid );
   auto parent_index_element = std::make_shared< ContentIndexUnit >( test_theme.uuid, std::string(""), test_unit_parent->uuid );
-  auto child_index_element = std::make_shared< ContentIndexUnit >( test_theme.uuid, test_unit_parent->uuid, test_unit_child1->uuid );
+  auto child_index_element = std::make_shared< ContentIndexUnit >( test_theme.uuid, test_unit_parent->uuid, test_unit_child->uuid );
 
   EXPECT_TRUE ( DatabaseManager::Instance().InsertTheme( test_theme ) );
   EXPECT_TRUE ( DatabaseManager::Instance().InsertUnitWithIndex( test_unit_parent, parent_index_element ) );
-  EXPECT_TRUE ( DatabaseManager::Instance().InsertUnitWithIndex( test_unit_child1, child_index_element ) );
+  EXPECT_TRUE ( DatabaseManager::Instance().InsertUnitWithIndex( test_unit_child, child_index_element ) );
 
   auto index = DatabaseManager::Instance().GetIndexForTheme( test_theme.uuid );
   ASSERT_TRUE ( index.size() == 2 );
   auto it = std::find_if( index.begin(), index.end(), [ parent_index_element ]( std::shared_ptr<ContentIndexUnit> index_unit )
-                                                            { return index_unit == parent_index_element; });
+                                                            { return parent_index_element->unit_uuid == index_unit->unit_uuid &&
+                                                                parent_index_element->parent_uuid == index_unit->parent_uuid &&
+                                                                parent_index_element->theme_uuid == index_unit->theme_uuid; });
   EXPECT_TRUE ( it != index.end() );
   it = std::find_if( index.begin(), index.end(), [ child_index_element ]( std::shared_ptr<ContentIndexUnit> index_unit )
-                                                            { return index_unit == child_index_element; });
+                                                            { return child_index_element->unit_uuid == index_unit->unit_uuid &&
+                                                                child_index_element->parent_uuid == index_unit->parent_uuid &&
+                                                                child_index_element->theme_uuid == index_unit->theme_uuid; });
   EXPECT_TRUE ( it != index.end() );
 }

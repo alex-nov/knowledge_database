@@ -26,19 +26,20 @@ DatabaseManagerFixture() {
     DatabaseManager::Instance().Init(db_options);
     DatabaseManager::Instance().ClearDB();
 
-    test_theme = ThemeTuple{utils::generate_uuid_v4(), "test_theme"};
+    test_theme = ThemeTuple{ utils::generate_uuid_v4(), "test_theme" };
   }
 
-  ~DatabaseManagerFixture() override {
+  ~DatabaseManagerFixture() override
+  {
     DatabaseManager::Instance().ClearDB();
   }
 
-  std::shared_ptr<ContentUnit> GetRandomUnit(const std::string & theme_id)
+  std::shared_ptr< ContentUnit > GetRandomUnit(const std::string & theme_id)
   {
-    auto unit = std::make_shared<ContentUnit>(utils::generate_random_string(10), theme_id);
-    unit->text = utils::generate_random_string(20);
-    unit->local_path = utils::generate_random_string(20);
-    unit->content_url = utils::generate_random_string(20);
+    auto unit = std::make_shared< ContentUnit >( utils::generate_random_string( 10 ), theme_id );
+    unit->text = utils::generate_random_string( 20 );
+    unit->local_path = utils::generate_random_string( 20 );
+    unit->content_url = utils::generate_random_string( 20 );
 
     return unit;
   }
